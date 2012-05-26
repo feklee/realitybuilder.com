@@ -1,9 +1,12 @@
 Introduction
 ============
 
-This directory contains the code for the site hosted on: RealityBuilder.com
+This directory is planned to contain code for the next version of the site
+hosted on: RealityBuilder.com
 
-See also the [repository on GitHub][1].
+The code of the current version is hosted on [Google Code][1].
+
+See also the [repository on GitHub][2].
 
 
 Directory public/separate
@@ -60,7 +63,7 @@ To make the site work with Internet Explorer versions less than 9, FlashCanvas
 Pro is required. For reasons of license, this library is not included in the
 source code distribution. If desired, install it as follows:
 
- 1. Download [FlashCanvas Pro 1.5 or compatible][2].
+ 1. Download [FlashCanvas Pro 1.5 or compatible][3].
 
  2. Place FlashCanvas Pro into:
 
@@ -73,7 +76,7 @@ source code distribution. If desired, install it as follows:
 Legal
 =====
 
-Copyright 2011-2012 Felix E. Klee [Felix E. Klee][3]
+Copyright 2011-2012 Felix E. Klee [Felix E. Klee][4]
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License. You may obtain a copy of the
@@ -88,5 +91,6 @@ specific language governing permissions and limitations under the License.
 
 
 [1]: https://github.com/feklee/realitybuilder.com
-[2]: http://flashcanvas.net/
-[3]: mailto:felix.klee@inka.de
+[2]: http://code.google.com/p/realitybuildercom
+[3]: http://flashcanvas.net/
+[4]: mailto:felix.klee@inka.de
