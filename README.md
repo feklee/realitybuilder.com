@@ -6,20 +6,20 @@ This directory contains the code for the site hosted on: RealityBuilder.com
 See also the [repository on GitHub][1].
 
 
-Directory `separate`
-====================
+Directory public/separate
+=========================
 
-The directory `separate` is for components that should not be redistributed as
-part of the RealityBuilder.com code, for example due to license issues or due
-to size.
+The directory `public/separate` is for components that should not be
+redistributed as part of the RealityBuilder.com code, for example due to
+license issues or due to size.
 
 
-Directory `secret`
-==================
+Directory public/secret
+=======================
 
-The directory `secret` is for components that should not be redistributed as
-part of the RealityBuilder.com code, and that should not be accessible from the
-web.
+The directory `public/secret` is for components that should not be
+redistributed as part of the RealityBuilder.com code, and that should not be
+accessible from the web.
 
 
 Admin interface
