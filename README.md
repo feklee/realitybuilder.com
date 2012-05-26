@@ -17,12 +17,12 @@ redistributed as part of the RealityBuilder.com code, for example due to
 license issues or due to size.
 
 
-Directory public/secret
-=======================
+Directory secret
+================
 
-The directory `public/secret` is for components that should not be
-redistributed as part of the RealityBuilder.com code, and that should not be
-accessible from the web.
+The directory `secret` is for components that should not be redistributed as
+part of the RealityBuilder.com code, and that should not be accessible from the
+web.
 
 
 Admin interface
