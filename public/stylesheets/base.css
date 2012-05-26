@@ -1,0 +1,479 @@
+/* Copyright 2010, 2011 Felix E. Klee <felix.klee@inka.de>
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License. */
+* {
+  margin: 0;
+  padding: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+html,
+body {
+  height: 100%;
+}
+body,
+textarea {
+  font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+body {
+  font-size: 12px;
+}
+p {
+  margin-top: 1em;
+  text-align: left;
+  color: #fff;
+}
+h1 {
+  text-align: left;
+  font-size: 16px;
+}
+a,
+a:link,
+a:visited,
+a:hover,
+a:active,
+a:focus {
+  text-decoration: underline;
+}
+a,
+a:link,
+a:visited,
+a:focus {
+  color: #fff;
+}
+/* ":focus" is not highlighted, since otherwise, when hitting the back button
+with Opera 11, the lastly clicked link is always highlighted, which looks
+strange. */
+html.no-touch a:hover,
+a:active {
+  color: #f00;
+}
+table#contentContainer {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+table#contentContainer td {
+  width: 100%;
+  height: 100%;
+}
+:focus {
+  outline: none;
+  -moz-outline: none;
+  -moz-outline-style: none;
+}
+button::-moz-focus-inner {
+  border: 0;
+}
+#startScreen,
+#videoPlayerCover,
+#tooHighAlert,
+#oneOnTwoAlert,
+#resetAlert,
+#alertsPreloader,
+#loadIndicator,
+#stillImage,
+#videoPlayer,
+#realityBuilder,
+#controlPanel,
+#decXButton,
+#incXButton,
+#decYButton,
+#incYButton,
+#incZButton,
+#decZButton,
+#rotate90Button,
+#requestMakeRealButton,
+#annotationPanel,
+#annotationInputField,
+#sendButton,
+#skipButton,
+#blockLabel,
+#remainingNCharsLabel,
+#annotationInputField textarea {
+  position: absolute;
+}
+#startScreen,
+#videoPlayerCover {
+  width: 100%;
+  height: 100%;
+}
+#tooHighAlert,
+#oneOnTwoAlert,
+#resetAlert,
+#alertsPreloader {
+  background-image: url("/images/alerts.png");
+  height: 321px;
+}
+#tooHighAlert,
+#oneOnTwoAlert,
+#resetAlert {
+  left: 344px;
+  top: 116px;
+  width: 336px;
+  display: none;
+}
+#oneOnTwoAlert {
+  background-position: -350px 0px;
+}
+#resetAlert {
+  background-position: -700px 0px;
+}
+/* The preloader is needed and should not be hidden, at least for Opera 11.50,
+which doesn't load images for elements with "display: none". See also:
+
+  <url:http://perishablepress.com/press/2008/06/14/a-way-to-preload-images-with
+  out-javascript-that-is-so-much-better/#comment-67246> */
+#alertsPreloader {
+  left: 100%;
+  width: 700px;
+}
+#startScreen {
+  background-color: #000;
+}
+#loadIndicator {
+  left: 497px;
+  top: 330px;
+  width: 32px;
+  height: 32px;
+  background-image: url("/images/load_indicator.png");
+}
+#errorMessage {
+  position: relative;
+  margin: 0 auto;
+  text-align: left;
+  width: 240px;
+}
+#stillImage {
+  top: -15px;
+/* 15px are cut off at top and bottom, to get 690px height */
+  background-color: #808080;
+  width: 1024;
+  height: 720;
+}
+#videoPlayerCover {
+  background-color: transparent;
+}
+table#contentContainer {
+  position: absolute;
+}
+table#contentContainer td {
+  vertical-align: middle;
+}
+table#contentContainer tr {
+  height: 100%;
+}
+table#contentContainer tr.debug {
+  height: auto;
+}
+#view {
+  display: none;
+/* For browsers that don't support JS. */
+}
+html.js #view {
+  display: block;
+  position: relative;
+  margin: 0 auto;
+  text-align: left;
+  width: 1024px;
+  height: 690px;
+  overflow: hidden;
+}
+#controlPanel,
+#decXButton,
+#incXButton,
+#decYButton,
+#incYButton,
+#incZButton,
+#decZButton,
+#rotate90Button,
+#requestMakeRealButton,
+#annotationPanel,
+#annotationInputField,
+#sendButton,
+#skipButton {
+  background-image: url("../images/panels.png");
+}
+/* Elements are made non-selectable for various reasons:
+
+* Otherwise for buttons during clicking the text cursor may appear, at least in
+  Chrome 13.
+
+* The user may become confused when he accidentally selects certain elements
+  and they get highlighted.
+
+Note that care is taken not to make elements non-selectable, that are parent
+elements of elements that should be selectable, for example a textarea. The
+reason is that at least in Firefox 6, the select status is inherited by the
+child element, and reverting it does not seem to be possible. */
+#stillImage,
+#videoPlayer,
+#videoPlayerCover,
+#realityBuilder,
+#blockLabel,
+#remainingNCharsLabel,
+#annotationInputField.disabled textarea,
+#decXButton,
+#incXButton,
+#decYButton,
+#incYButton,
+#incZButton,
+#decZButton,
+#rotate90Button,
+#requestMakeRealButton,
+#sendButton,
+#skipButton {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+#decXButton,
+#incXButton,
+#decYButton,
+#incYButton,
+#incZButton,
+#decZButton,
+#rotate90Button,
+#requestMakeRealButton,
+#sendButton,
+#skipButton {
+/* Makes it easily visible which elements are clickable, even on browsers 
+    where hover is disabled because they also support touch. */
+  cursor: pointer;
+/* Disables builtin highlighting on touch, at least in iOS 4.3. */
+  -webkit-tap-highlight-color: transparent;
+}
+#decXButton.disabled,
+#incXButton.disabled,
+#decYButton.disabled,
+#incYButton.disabled,
+#incZButton.disabled,
+#decZButton.disabled,
+#rotate90Button.disabled,
+#requestMakeRealButton.disabled,
+#annotationInputField.disabled,
+#sendButton.disabled,
+#skipButton.disabled {
+  cursor: default;
+}
+#controlPanel,
+#annotationPanel {
+  bottom: 20px;
+  left: 276px;
+  width: 472px;
+  height: 132px;
+}
+#controlPanel.disabled,
+#annotationPanel.disabled {
+  background-position: 0px -140px;
+}
+#annotationPanel {
+  display: none;
+}
+#incZButton,
+#decZButton {
+  width: 62px;
+  height: 52px;
+}
+#incZButton {
+  left: 10px;
+  top: 10px;
+  background-position: 0 -280px;
+}
+html.no-touch #incZButton:hover,
+#incZButton:active {
+  background-position: 0 -400px;
+}
+#incZButton.disabled,
+html.no-touch #incZButton.disabled:hover {
+  background-position: 0 -520px;
+}
+#decZButton {
+  left: 10px;
+  top: 70px;
+  background-position: 0 -340px;
+}
+html.no-touch #decZButton:hover,
+#decZButton:active {
+  background-position: 0 -460px;
+}
+#decZButton.disabled,
+html.no-touch #decZButton.disabled:hover {
+  background-position: 0 -580px;
+}
+#incXButton {
+  left: 226px;
+  top: 9px;
+  width: 71px;
+  height: 39px;
+  background-position: -250px -280px;
+}
+html.no-touch #incXButton:hover,
+#incXButton:active {
+  background-position: -250px -400px;
+}
+#incXButton.disabled,
+html.no-touch #incXButton.disabled:hover {
+  background-position: -250px -520px;
+}
+#decXButton {
+  left: 101px;
+  top: 74px;
+  width: 80px;
+  height: 49px;
+  background-position: -70px -340px;
+}
+html.no-touch #decXButton:hover,
+#decXButton:active {
+  background-position: -70px -460px;
+}
+#decXButton.disabled,
+html.no-touch #decXButton.disabled:hover {
+  background-position: -70px -580px;
+}
+#incYButton {
+  left: 112px;
+  top: 11px;
+  width: 71px;
+  height: 38px;
+  background-position: -70px -280px;
+}
+html.no-touch #incYButton:hover,
+#incYButton:active {
+  background-position: -70px -400px;
+}
+#incYButton.disabled,
+html.no-touch #incYButton.disabled:hover {
+  background-position: -70px -520px;
+}
+#decYButton {
+  left: 231px;
+  top: 72px;
+  width: 80px;
+  height: 49px;
+  background-position: -250px -340px;
+}
+html.no-touch #decYButton:hover,
+#decYButton:active {
+  background-position: -250px -460px;
+}
+#decYButton.disabled,
+html.no-touch #decYButton.disabled:hover {
+  background-position: -250px -580px;
+}
+#rotate90Button {
+  left: 167px;
+  top: 39px;
+  width: 76px;
+  height: 51px;
+  background-position: -160px -280px;
+}
+html.no-touch #rotate90Button:hover,
+#rotate90Button:active {
+  background-position: -160px -400px;
+}
+#rotate90Button.disabled,
+html.no-touch #rotate90Button.disabled:hover {
+  background-position: -160px -520px;
+}
+#requestMakeRealButton {
+  left: 340px;
+  top: 10px;
+  width: 122px;
+  height: 112px;
+  background-position: -340px -280px;
+}
+html.no-touch #requestMakeRealButton:hover,
+#requestMakeRealButton:active {
+  background-position: -340px -400px;
+}
+#requestMakeRealButton.disabled,
+html.no-touch #requestMakeRealButton.disabled:hover {
+  background-position: -340px -520px;
+}
+#annotationInputField {
+  left: 10px;
+  top: 10px;
+  width: 322px;
+  height: 112px;
+  background-position: 0 -640px;
+}
+#annotationInputField.disabled {
+  background-position: 0 -880px;
+}
+#annotationInputField,
+#annotationInputField textarea {
+  font-size: 16px;
+  color: #fff;
+}
+#annotationInputField textarea {
+  left: 10px;
+  top: 30px;
+  background: transparent;
+  overflow: hidden;
+  border: none;
+  resize: none;
+  width: 300px;
+}
+#annotationInputField.disabled textarea,
+#annotationInputField.disabled #blockLabel,
+#annotationInputField.disabled #remainingNCharsLabel,
+#annotationInputField textarea.notYetFocused {
+  color: #999;
+}
+#blockLabel {
+  left: 10px;
+  top: 10px;
+}
+#remainingNCharsLabel {
+  left: 280px;
+  top: 10px;
+  text-align: right;
+  width: 30px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+#sendButton,
+#skipButton {
+  width: 122px;
+  height: 52px;
+}
+#sendButton {
+  left: 340px;
+  top: 10px;
+  background-position: -330px -640px;
+}
+html.no-touch #sendButton:hover,
+#sendButton:active {
+  background-position: -330px -760px;
+}
+#sendButton.disabled,
+html.no-touch #sendButton.disabled:hover {
+  background-position: -330px -880px;
+}
+#skipButton {
+  left: 340px;
+  top: 70px;
+  background-position: -330px -700px;
+}
+html.no-touch #skipButton:hover,
+#skipButton:active {
+  background-position: -330px -820px;
+}
+#skipButton.disabled,
+html.no-touch #skipButton.disabled:hover {
+  background-position: -330px -940px;
+}

@@ -9,7 +9,7 @@ See also the [repository on GitHub][1].
 Directory public/separate
 =========================
 
-The directory `public/separate` is for components that should not be
+The directory `public/separate` is for static components that should not be
 redistributed as part of the RealityBuilder.com code, for example due to
 license issues or due to size.
 
