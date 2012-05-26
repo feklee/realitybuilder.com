@@ -90,7 +90,7 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 
 
-[1]: https://github.com/feklee/realitybuilder.com
-[2]: http://code.google.com/p/realitybuildercom
+[1]: http://code.google.com/p/realitybuildercom
+[2]: https://github.com/feklee/realitybuilder.com
 [3]: http://flashcanvas.net/
 [4]: mailto:felix.klee@inka.de
