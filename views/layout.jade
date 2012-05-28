@@ -1,6 +1,132 @@
-!!!
-html
+//- Copyright 2011, 2012 Felix E. Klee <felix.klee@inka.de>
+//-
+//- Licensed under the Apache License, Version 2.0 (the "License"); you may not
+//- use this file except in compliance with the License. You may obtain a copy
+//- of the License at
+//-
+//-   http://www.apache.org/licenses/LICENSE-2.0
+//-
+//- Unless required by applicable law or agreed to in writing, software
+//- distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+//- WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+//- License for the specific language governing permissions and limitations
+//- under the License.
+
+!!! 5
+html(lang='en')
   head
+    meta(charset='UTF-8')
     title= title
-    link(rel='stylesheet', href='/stylesheets/base.css')
-  body!= body
+    link(rel='shortcut icon', href='/images/favicon.png')
+    link(rel='stylesheet', href='/stylesheets/reset.css')
+    link(rel='stylesheet', href='/stylesheets/layout.css')
+
+    //- For iOS: disables zoom, enables full screen. For why `width` is set to
+    //- the arcane `devide-height`, see:
+    //- http://stackoverflow.com/questions/7132064
+    meta(name='viewport', content='user-scalable=no,width=device-height')
+    meta(name='apple-mobile-web-app-capable', content='yes')
+    meta(name='apple-mobile-web-app-status-bar-style', content='black')
+
+    //if lte IE 7
+      link(rel='stylesheet', href='/stylesheets/base_lte_IE_7.css')
+
+    //- As of August 2011, the Modernizr documentation states: "The reason we
+    //- recommend placing Modernizr in the head is two-fold: the HTML5 Shiv
+    //- (that enables HTML5 elements in IE) must execute before the <body>, and
+    //- if you’re using any of the CSS classes that Modernizr adds, you’ll want
+    //- to prevent a FOUC."
+    script(src='/vendor/modernizr.js')
+
+    block head
+
+  //- `ontouchstart` is specified to make highlight work on iOS:
+  //- <url:http://stackoverflow.com/questions/3885018>
+  body(ontouchstart='')
+    //- There may be content that is added dynamically instead of being hidden
+    //- and later unhidden using CSS. Rationale: browsers that neither support
+    //- CSS nor JavaScript should only show the JavaScript-not-supported error
+    //- message.
+    //-
+    //- Centering of content is done with the help of a table, since other
+    //- solutions don't seem to work decently with older browsers such as IE6.
+    //- The problem often is that when the window is too small, content is
+    //- clipped from the top.
+    //-
+    //- When changing the implementation for centering, don't forget to check
+    //- whether the content is still displayed correctly when the browser
+    //- window is smaller than the content.
+    table#contentContainer
+      tr
+        td
+          #errorMessage
+            noscript
+              p
+                | The Reality Builder does not work because your browser does
+                | not support 
+                a(href='http://developer.mozilla.org/en/JavaScript/About_JavaScript') JavaScript
+                |, or because JavaScript is disabled.
+          #view
+            #videoPlayer
+            #videoPlayerOverlay
+              img#stillImage(src='images/placeholder.gif', alt='Still image')
+
+              //- needed to prevent mouse events from reaching the player:
+              #videoPlayerCover
+
+              #realityBuilder
+
+
+              #controlPanel
+                #rotate90Button
+                #incXButton
+                #decXButton
+                #incYButton
+                #decYButton
+                #incZButton
+                #decZButton
+                #requestMakeRealButton
+
+              #annotationPanel
+                #annotationInputField
+                  #blockLabel
+                  #remainingNCharsLabel
+                  textarea(rows='4', spellcheck='false')
+                #sendButton
+                #skipButton
+
+              #tooHighAlert
+              #oneOnTwoAlert
+              #resetAlert
+              #alertsPreloader
+
+              #startScreen
+
+              #loadIndicator
+
+          block sideBar
+          block bottomBar
+
+    include includes/layout_ie
+
+    script(src='/vendor/jquery-1.6.2.min.js')
+
+    script(src='/vendor/jquery.easing.1.3.js')
+
+    //- doesn't work reliably with IE, although it says so in the docs:
+    script(src='/vendor/jquery.transform.light.js')
+
+    script(src='http://' + realityBuilderVersion + '.realitybuilder-hrd.appspot.com/realitybuilder.js')
+
+    //- needs to be loaded before the YouTube API:
+    script(src='/javascripts/base.js')
+
+    | <script>
+    | realityBuilderCom.base.setRealityBuilderVersion('
+    =realityBuilderVersion
+    | ')
+    | </script>
+
+    script(src='http://www.youtube.com/player_api', async)
+
+    block scripts

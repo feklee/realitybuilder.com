@@ -23,5 +23,6 @@
 /*jslint unparam:true */
 exports.index = function (req, res) {
     /*jslint unparam:false */
-    res.render('index', {title: 'Reality Builder'});
+    res.render('index', {title: 'Reality Builder',
+                         realityBuilderVersion: '1-9-0'});
 };

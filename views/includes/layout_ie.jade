@@ -1,0 +1,29 @@
+//- Internet Explorer specific code.
+//-
+//- Copyright 2011 Felix E. Klee <felix.klee@inka.de>
+//-
+//- Licensed under the Apache License, Version 2.0 (the "License"); you may not
+//- use this file except in compliance with the License. You may obtain a copy
+//- of the License at
+//-
+//-   http://www.apache.org/licenses/LICENSE-2.0
+//-
+//- Unless required by applicable law or agreed to in writing, software
+//- distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+//- WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+//- License for the specific language governing permissions and limitations
+//- under the License.
+
+//- adds support for transparent PNG to IE6:
+
+//if lte IE 6
+  script(src='/javascript/DD_belatedPNG_0.0.8a-min.js')
+  script
+    DD_belatedPNG.fix('#controlPanel,#decXButton,#incXButton,#decYButton,' +
+                      '#incYButton,#incZButton,#decZButton,#rotate90Button,' +
+                      '#requestMakeRealButton');
+
+//- adds support for canvas tag to IE<9:
+//if lt IE 9
+  script(src="/javascript/swfobject.js")
+  script(src="/separate/FlashCanvasPro/bin/flashcanvas.js")
