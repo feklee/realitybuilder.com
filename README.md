@@ -9,20 +9,19 @@ The code of the current version is hosted on [Google Code][1].
 See also the [repository on GitHub][2].
 
 
-Directory public/separate
-=========================
+Directory separate
+==================
 
-The directory `public/separate` is for static components that should not be
+The directory `separate` is for static components that should not be
 redistributed as part of the RealityBuilder.com code, for example due to
-license issues or due to size.
+licensing issues or due to size.
 
 
 Directory secret
 ================
 
-The directory `secret` is for components that should not be redistributed as
-part of the RealityBuilder.com code, and that should not be accessible from the
-web.
+The directory `secret` is for components, such as passwords for web services,
+that should not be redistributed as part of the RealityBuilder.com code.
 
 
 Admin interface
@@ -38,7 +37,7 @@ Still images
 Still images are not part of the code, due to their size. Download them from
 the RealityBuilder.com code hosting site, and extract them to:
 
-    /separate/still_images
+    /separate/public/still_images
 
 
 Twitter OAuth secret
@@ -67,10 +66,7 @@ source code distribution. If desired, install it as follows:
 
  2. Place FlashCanvas Pro into:
 
-        /separate/FlashCanvasPro
-
-    The directory "separate" is components that should not be redistributed as
-    part of the Reality Builder source code.
+        /separate/public/FlashCanvasPro
 
 
 Legal

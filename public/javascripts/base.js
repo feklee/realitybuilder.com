@@ -441,7 +441,7 @@ realityBuilderCom.annotationPanel = (function () {
 realityBuilderCom.base = (function () {
     var publicInterface,
     stillImage = {
-        base: '/separate/still_images/',
+        base: '/still_images/',
         url: null,
         blockConfigurationI: null // index of associated block configuration
     },
