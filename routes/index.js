@@ -1,7 +1,5 @@
 // -*- coding: utf-8 -*-
 
-// Home page.
-
 // Copyright 2010-2012 Felix E. Klee <felix.klee@inka.de>
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -20,9 +18,26 @@
 
 'use strict';
 
+// Home page.
 /*jslint unparam:true */
 exports.index = function (req, res) {
     /*jslint unparam:false */
     res.render('index', {title: 'Reality Builder',
                          realityBuilderVersion: '1-9-0'});
+};
+
+// Administration interface.
+exports.admin = function (req, res) {
+    res.render('admin', {title: 'Reality Builder',
+                         realityBuilderVersion: '1-9-0'});
+};
+
+// Twitters a tweet via Twitter.
+/*jslint unparam:true */
+exports.twitter = function (req, res) {
+    var twitter = require('ntwitter');
+    /*jslint unparam:false */
+    console.log('twitter'); // fixme
+/*fixme    res.render('index', {title: 'Reality Builder',
+                         realityBuilderVersion: '1-9-0'});*/
 };

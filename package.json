@@ -1,10 +1,17 @@
 {
-    "name": "application-name"
-  , "version": "0.0.1"
-  , "private": true
-  , "dependencies": {
-      "express": "2.5.8"
-    , "stylus": ">= 0.0.1"
-    , "jade": ">= 0.0.1"
+  "name": "RealityBuilder.com",
+  "subdomain": "realitybuildercom",
+  "scripts": {
+    "start": "app.js"
+  },
+  "version": "2.0.0pre-5",
+  "dependencies": {
+    "express": "2.5.x",
+    "ntwitter": "0.3.x",
+    "stylus": "0.27.x",
+    "jade": "0.26.x"
+  },
+  "engines": {
+    "node": "0.6.x"
   }
 }

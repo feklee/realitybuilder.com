@@ -35,6 +35,8 @@ app.configure('production', function () {
 // Routes
 
 app.get('/', routes.index);
+app.get('/admin', routes.admin);
+app.get('/twitter', routes.twitter); // fixme: make post
 
 app.listen(3000, function () {
     console.log("Express server listening on port %d in %s mode",
