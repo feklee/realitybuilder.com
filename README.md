@@ -45,14 +45,18 @@ Twitter OAuth secret
 
 The consumer secret for Twitter OAuth should be stored in:
 
-    /secret/twitter.yaml
+    /secret/twitter.json
 
 Example content:
 
-    consumer_key: "123"
-    consumer_secret: "abc"
-    oauth_token: "987"
-    oauth_token_secret: "xyz"
+    {
+        "twitter": {
+            "consumer_key": "123",
+            "consumer_secret": "abc",
+            "access_token_key": "987",
+            "access_token_secret": "xyz"
+        }
+    }
 
 
 Internet Explorer support

@@ -18,6 +18,19 @@
 
 'use strict';
 
+var Twitter = require('ntwitter'),
+    nconf = require('nconf'),
+    twitter;
+
+nconf.file({file: 'secret/twitter.json'});
+twitter = new Twitter(nconf.get('twitter'));
+twitter.verifyCredentials(function (errorMessage) {
+    if (errorMessage) {
+        console.log('Verifying Twitter credentials failed: ' + errorMessage);
+        process.exit(1);
+    }
+});
+
 // Home page.
 /*jslint unparam:true */
 exports.index = function (req, res) {
@@ -35,9 +48,16 @@ exports.admin = function (req, res) {
 // Twitters a tweet via Twitter.
 /*jslint unparam:true */
 exports.twitter = function (req, res) {
-    var twitter = require('ntwitter');
     /*jslint unparam:false */
-    console.log('twitter'); // fixme
-/*fixme    res.render('index', {title: 'Reality Builder',
-                         realityBuilderVersion: '1-9-0'});*/
+
+    twitter.updateStatus(
+        req.body.status,
+        function (errorMessage) {
+            if (errorMessage) {
+                console.log('Tweeting failed: ' + errorMessage);
+            }
+        }
+    );
+
+    res.end();
 };
