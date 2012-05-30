@@ -38,6 +38,7 @@ app.configure('production', function () {
 
 app.get('/', routes.index);
 app.get('/admin', routes.admin);
+app.get('/presentation', routes.presentation);
 app.post('/twitter', routes.twitter);
 
 app.listen(3000, function () {

@@ -45,6 +45,14 @@ exports.admin = function (req, res) {
                          realityBuilderVersion: '1-9-0'});
 };
 
+// Presentation, as of early 2012 linked from:
+//
+//   <url:http://prezi.com/3rglon2gvazu/reality-builder/?auth_key=772126086aa01
+//   bb98733b87b6295b6baac03ca72>
+exports.presentation = function (req, res) {
+    res.render('presentation');
+};
+
 // Twitters a tweet via Twitter.
 /*jslint unparam:true */
 exports.twitter = function (req, res) {
