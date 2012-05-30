@@ -12,16 +12,9 @@ See also the [repository on GitHub][2].
 Directory separate
 ==================
 
-The directory `separate` is for static components that should not be
-redistributed as part of the RealityBuilder.com code, for example due to
-licensing issues or due to size.
-
-
-Directory secret
-================
-
-The directory `secret` is for components, such as passwords for web services,
-that should not be redistributed as part of the RealityBuilder.com code.
+The directory `separate` is for content that should not be redistributed as
+part of the RealityBuilder.com code, for example due to licensing issues, due
+to size, or because it contains sensitive information.
 
 
 Admin interface
@@ -35,9 +28,16 @@ Still images
 ============
 
 Still images are not part of the code, due to their size. Download them from
-the RealityBuilder.com code hosting site, and extract them to:
+the RealityBuilder.com code hosting site, and host them wherever you like. The
+location of the still images is stored in:
 
-    separate/public/still_images
+    separate/config.json
+
+Example content:
+
+    {
+        "stillImagesBaseUrl": "http://example.com/still_images/"
+    }
 
 
 Twitter OAuth credentials
@@ -45,7 +45,7 @@ Twitter OAuth credentials
 
 The credentials for Twitter OAuth are stored in:
 
-    secret/twitter.json
+    separate/config.json
 
 Example content:
 
@@ -64,8 +64,8 @@ SSL certificate for HTTPS
 
 The SSL certificate and the associated private key are stored in:
 
-    secret/cert.pem
-    secret/key.pem
+    separate/cert.pem
+    separate/key.pem
 
 A self signed certificate with key (e.g. for testing) may be created as follows
 using OpenSSL:
@@ -81,7 +81,7 @@ Admin interface credentials
 
 The credentials for accessing `/admin` are stored in:
 
-    secret/admin.json
+    separate/config.json
 
 Example content:
 

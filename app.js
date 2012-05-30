@@ -7,11 +7,14 @@ var express = require('express'),
     app = module.exports = express.createServer(),
     fs = require('fs'),
     secureApp = express.createServer({
-        key: fs.readFileSync('secret/key.pem'),
-        cert: fs.readFileSync('secret/cert.pem')
+        key: fs.readFileSync('separate/key.pem'),
+        cert: fs.readFileSync('separate/cert.pem')
     }),
     nconf = require('nconf'),
-    admin;
+    adminConfig;
+
+nconf.file({file: 'separate/config.json'});
+
 
 // Configuration
 
@@ -61,10 +64,9 @@ app.get('/presentation', routes.presentation);
 app.get('/admin', routes.admin);
 app.post('/twitter', routes.twitter);
 
-nconf.file({file: 'secret/admin.json'});
-admin = nconf.get('admin');
-secureApp.get('/admin', express.basicAuth(admin.username,
-                                          admin.password),
+adminConfig = nconf.get('admin');
+secureApp.get('/admin', express.basicAuth(adminConfig.username,
+                                          adminConfig.password),
               routes.secureAdmin);
 
 function onListening(app) {

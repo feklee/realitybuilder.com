@@ -23,7 +23,7 @@ var Twitter = require('ntwitter'),
     twitter,
     realityBuilderVersion = '1-9-0';
 
-nconf.file({file: 'secret/twitter.json'});
+nconf.file({file: 'separate/config.json'});
 twitter = new Twitter(nconf.get('twitter'));
 twitter.verifyCredentials(function (errorMessage) {
     if (errorMessage) {
