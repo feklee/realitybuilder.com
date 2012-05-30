@@ -37,15 +37,15 @@ Still images
 Still images are not part of the code, due to their size. Download them from
 the RealityBuilder.com code hosting site, and extract them to:
 
-    /separate/public/still_images
+    separate/public/still_images
 
 
-Twitter OAuth secret
-====================
+Twitter OAuth credentials
+=========================
 
-The consumer secret for Twitter OAuth should be stored in:
+The credentials for Twitter OAuth are stored in:
 
-    /secret/twitter.json
+    secret/twitter.json
 
 Example content:
 
@@ -55,6 +55,40 @@ Example content:
             "consumer_secret": "abc",
             "access_token_key": "987",
             "access_token_secret": "xyz"
+        }
+    }
+
+
+SSL certificate for HTTPS
+=========================
+
+The SSL certificate and the associated private key are stored in:
+
+    secret/cert.pem
+    secret/key.pem
+
+A self signed certificate with key (e.g. for testing) may be created as follows
+using OpenSSL:
+
+    $ openssl genrsa -out key.pem
+    $ openssl req -new -key key.pem -out csr.pem
+    $ openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem
+    $ rm csr.pem
+
+
+Admin interface credentials
+===========================
+
+The credentials for accessing `/admin` are stored in:
+
+    secret/admin.json
+
+Example content:
+
+    {
+        "admin": {
+            "username": "123",
+            "password": "abc"
         }
     }
 

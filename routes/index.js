@@ -39,9 +39,13 @@ exports.index = function (req, res) {
                          realityBuilderVersion: '1-9-0'});
 };
 
-// Administration interface.
 exports.admin = function (req, res) {
-    res.render('admin', {title: 'Reality Builder',
+    res.redirect('https://' + req.header('Host') + req.url);
+};
+
+// Administration interface.
+exports.secureAdmin = function (req, res) {
+    res.render('admin', {title: 'Reality Builder Administration',
                          realityBuilderVersion: '1-9-0'});
 };
 

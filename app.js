@@ -4,11 +4,18 @@
 
 var express = require('express'),
     routes = require('./routes'),
-    app = module.exports = express.createServer();
+    app = module.exports = express.createServer(),
+    fs = require('fs'),
+    secureApp = express.createServer({
+        key: fs.readFileSync('secret/key.pem'),
+        cert: fs.readFileSync('secret/cert.pem')
+    }),
+    nconf = require('nconf'),
+    admin;
 
 // Configuration
 
-app.configure(function () {
+function configureApp(app) {
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
     app.set('view options', {
@@ -20,28 +27,50 @@ app.configure(function () {
     app.use(app.router);
     app.use(express['static'](__dirname + '/public'));
     app.use(express['static'](__dirname + '/separate/public'));
-});
+}
 
-app.configure('development', function () {
+app.configure(function () { configureApp(app); });
+secureApp.configure(function () { configureApp(secureApp); });
+
+function configureDevelopmentApp(app) {
     app.use(express.errorHandler({
         dumpExceptions: true,
         showStack: true
     }));
+}
+
+app.configure('development', function () { configureDevelopmentApp(app); });
+secureApp.configure('development', function () {
+    configureDevelopmentApp(secureApp);
 });
 
-app.configure('production', function () {
+function configureProductionApp(app) {
     app.use(express.errorHandler());
+}
+
+app.configure('production', function () { configureProductionApp(app); });
+secureApp.configure('production', function () {
+    configureProductionApp(secureApp);
 });
 
 
 // Routes
 
 app.get('/', routes.index);
-app.get('/admin', routes.admin);
 app.get('/presentation', routes.presentation);
+app.get('/admin', routes.admin);
 app.post('/twitter', routes.twitter);
 
-app.listen(3000, function () {
+nconf.file({file: 'secret/admin.json'});
+admin = nconf.get('admin');
+secureApp.get('/admin', express.basicAuth(admin.username,
+                                          admin.password),
+              routes.secureAdmin);
+
+function onListening(app) {
     console.log("Express server listening on port %d in %s mode",
                 app.address().port, app.settings.env);
-});
+}
+
+app.listen(8080, function () { onListening(app); });
+secureApp.listen(8443, function () { onListening(secureApp); });
