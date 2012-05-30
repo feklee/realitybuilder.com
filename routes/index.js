@@ -20,7 +20,8 @@
 
 var Twitter = require('ntwitter'),
     nconf = require('nconf'),
-    twitter;
+    twitter,
+    realityBuilderVersion = '1-9-0';
 
 nconf.file({file: 'secret/twitter.json'});
 twitter = new Twitter(nconf.get('twitter'));
@@ -36,7 +37,7 @@ twitter.verifyCredentials(function (errorMessage) {
 exports.index = function (req, res) {
     /*jslint unparam:false */
     res.render('index', {title: 'Reality Builder',
-                         realityBuilderVersion: '1-9-0'});
+                         realityBuilderVersion: realityBuilderVersion});
 };
 
 exports.admin = function (req, res) {
@@ -46,7 +47,7 @@ exports.admin = function (req, res) {
 // Administration interface.
 exports.secureAdmin = function (req, res) {
     res.render('admin', {title: 'Reality Builder Administration',
-                         realityBuilderVersion: '1-9-0'});
+                         realityBuilderVersion: realityBuilderVersion});
 };
 
 // Presentation, as of early 2012 linked from:
