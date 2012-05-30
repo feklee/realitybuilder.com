@@ -129,9 +129,6 @@ table#blocksTable td select {
   text-align: left;
   width: 640px;
 }
-#logoutButton {
-  float: right;
-}
 #toggleRealButton,
 #togglePendingButton {
   width: 12em;

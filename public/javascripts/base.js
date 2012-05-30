@@ -441,7 +441,6 @@ realityBuilderCom.annotationPanel = (function () {
 realityBuilderCom.base = (function () {
     var publicInterface,
     stillImage = {
-        base: '/still_images/',
         url: null,
         blockConfigurationI: null // index of associated block configuration
     },
@@ -855,7 +854,7 @@ realityBuilderCom.base = (function () {
 
     // Returns the URL of the specified image.
     function stillImageUrl(videoIndex, type) {
-        return stillImage.base + videoIndex + '_' + type + '.jpg';
+        return stillImage.baseUrl + videoIndex + '_' + type + '.jpg';
     }
 
     // Returns the URL of the first image of the specified video clip.
@@ -1324,6 +1323,10 @@ realityBuilderCom.base = (function () {
     publicInterface = {
         setRealityBuilderVersion: function (x) {
             realityBuilderVersion = x;
+        },
+
+        setStillImagesBaseUrl: function (x) {
+            stillImage.baseUrl = x;
         },
 
         // Returns settings for the Reality Builder.

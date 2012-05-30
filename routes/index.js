@@ -36,8 +36,11 @@ twitter.verifyCredentials(function (errorMessage) {
 /*jslint unparam:true */
 exports.index = function (req, res) {
     /*jslint unparam:false */
-    res.render('index', {title: 'Reality Builder',
-                         realityBuilderVersion: realityBuilderVersion});
+    res.render('index', {
+        title: 'Reality Builder',
+        realityBuilderVersion: realityBuilderVersion,
+        stillImagesBaseUrl: nconf.get('stillImages').baseUrl
+    });
 };
 
 exports.admin = function (req, res) {
@@ -46,8 +49,11 @@ exports.admin = function (req, res) {
 
 // Administration interface.
 exports.secureAdmin = function (req, res) {
-    res.render('admin', {title: 'Reality Builder Administration',
-                         realityBuilderVersion: realityBuilderVersion});
+    res.render('admin', {
+        title: 'Reality Builder Administration',
+        realityBuilderVersion: realityBuilderVersion,
+        stillImagesBaseUrl: nconf.get('stillImages').baseUrl
+    });
 };
 
 // Presentation, as of early 2012 linked from:

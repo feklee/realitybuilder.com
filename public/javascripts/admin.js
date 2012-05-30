@@ -20,7 +20,7 @@
 /*global realityBuilderCom, realityBuilder, $, alert */
 
 realityBuilderCom.admin = (function () {
-    var publicInterface, logoutUrl;
+    var publicInterface;
 
     function updateBlocksVisibilityButton(type, text, blocksAreVisible, 
                                           setVisibility)
@@ -55,17 +55,6 @@ realityBuilderCom.admin = (function () {
         blocksAreVisible = realityBuilder.pendingBlocksAreVisible();
         updateBlocksVisibilityButton('pending', 'Pending', 
                                      blocksAreVisible, setVisibility);
-    }
-
-    // Logs the administrator out, sending him back to the login screen.
-    function logout() {
-        if (typeof logoutUrl !== 'undefined') {
-            location.href = logoutUrl;
-        }
-    }
-
-    function setUpLogoutButton() {
-        $('#logoutButton').click(logout);
     }
 
     // Returns data read entered using the camera controls.
@@ -270,7 +259,6 @@ realityBuilderCom.admin = (function () {
     }
 
     function onReady() {
-        setUpLogoutButton();
         setUpSaveSettingsButton();
         setUpPreviewCameraButton();
         setUpPrerenderModeButtons();
@@ -286,10 +274,6 @@ realityBuilderCom.admin = (function () {
     }
 
     publicInterface = {
-        setLogoutUrl: function (x) {
-            logoutUrl = x;
-        },
-
         settings: function () {
             var settings;
 
