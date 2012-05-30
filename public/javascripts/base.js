@@ -371,7 +371,7 @@ realityBuilderCom.annotationPanel = (function () {
 
         if (!isDisabled) {
             status = annotation().substring(0, maxNChars);
-            $.post('/rpc/twitter', { status: status });
+            $.post('/twitter', { status: status });
             onDone();
         }
     }
