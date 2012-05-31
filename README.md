@@ -112,7 +112,7 @@ source code distribution. If desired, install it as follows:
 Legal
 =====
 
-Copyright 2011-2012 Felix E. Klee [Felix E. Klee][5]
+Copyright 2011-2012 [Felix E. Klee][5]
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License. You may obtain a copy of the

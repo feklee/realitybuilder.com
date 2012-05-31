@@ -4,7 +4,7 @@
   "scripts": {
     "start": "app.js"
   },
-  "version": "2.0.0pre-8",
+  "version": "2.0.0pre11",
   "dependencies": {
     "express": "2.5.x",
     "ntwitter": "0.3.x",
