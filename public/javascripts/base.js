@@ -14,19 +14,20 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-/*jslint white: true, onevar: true, undef: true, newcap: true, nomen: true,
-  regexp: true, plusplus: true, bitwise: true, browser: true, nomen: false */
+/*jslint browser: true, maxerr: 50, maxlen: 79, nomen: true */
 
-/*global realityBuilder, $, YT, alert, Modernizr */
+/*global realityBuilder, $, YT, Modernizr */
 
 var realityBuilderCom = {};
 
 // Load indicator animation.
 realityBuilderCom.loadIndicator = (function () {
-    var publicInterface, 
-    id = null, 
-    shouldBeStarted = false, 
-    frameDuration = 150; // ms
+    'use strict';
+
+    var publicInterface,
+        id = null,
+        shouldBeStarted = false,
+        frameDuration = 150; // ms
 
     function stop() {
         if (id !== null) {
@@ -81,8 +82,9 @@ realityBuilderCom.loadIndicator = (function () {
 }());
 
 realityBuilderCom.alert = (function () {
-    var 
-    publicInterface;
+    'use strict';
+
+    var publicInterface;
 
     publicInterface = {
         // Flashs up an alert image, i.e. shows it only for a moment. If CSS
@@ -99,9 +101,9 @@ realityBuilderCom.alert = (function () {
                     animate({
                         transform: 'scale(1)'
                     }, {
-                        duration: 1000, 
-                        easing: 'easeOutElastic', 
-                        complete: function () { 
+                        duration: 1000,
+                        easing: 'easeOutElastic',
+                        complete: function () {
                             node.hide();
                         }
                     });
@@ -117,6 +119,8 @@ realityBuilderCom.alert = (function () {
 }());
 
 realityBuilderCom.panel = function (type) {
+    'use strict';
+
     var publicInterface;
 
     // If CSS transforms are not supported by the browser, skips the animation.
@@ -157,25 +161,27 @@ realityBuilderCom.panel = function (type) {
 };
 
 realityBuilderCom.controlPanel = (function () {
+    'use strict';
+
     var publicInterface,
-    coordinateButtonDeltaBs = {
-        'incX': [1, 0, 0],
-        'decX': [-1, 0, 0],
-        'incY': [0, 1, 0],
-        'decY': [0, -1, 0],
-        'incZ': [0, 0, 1],
-        'decZ': [0, 0, -1]
-    },
-    makeRealButtonIsEnabled = false,
+        coordinateButtonDeltaBs = {
+            'incX': [1, 0, 0],
+            'decX': [-1, 0, 0],
+            'incY': [0, 1, 0],
+            'decY': [0, -1, 0],
+            'incZ': [0, 0, 1],
+            'decZ': [0, 0, -1]
+        },
+        makeRealButtonIsEnabled = false,
 
-    // If a block was requested to be made real by clicking the make-real
-    // button, then this contains the position and angle of that block, but
-    // only as long as the panel is frozen (disabled):
-    requestedPosBAndA = null,
+        // If a block was requested to be made real by clicking the make-real
+        // button, then this contains the position and angle of that block, but
+        // only as long as the panel is frozen (disabled):
+        requestedPosBAndA = null,
 
-    isDisabled = true, // entire panel is disabled?
+        isDisabled = true, // entire panel is disabled?
 
-    onMakeRealRequested = null;
+        onMakeRealRequested = null;
 
     function forEachCoordinateButton(f, panelShouldBeDisabled) {
         $.each(coordinateButtonDeltaBs, function (type, deltaB) {
@@ -200,16 +206,15 @@ realityBuilderCom.controlPanel = (function () {
         updateNodeState(controlButtonNode(type), shouldBeEnabled);
     }
 
-    function updateCoordinateButtonState(type, deltaB, 
-                                         panelShouldBeDisabled)
-    {
-        updateControlButtonState(type, 
+    function updateCoordinateButtonState(type, deltaB,
+                                         panelShouldBeDisabled) {
+        updateControlButtonState(type,
                                  !panelShouldBeDisabled &&
                                  realityBuilder.newBlock().canBeMoved(deltaB));
     }
 
     function updateRotate90ButtonState(panelShouldBeDisabled) {
-        updateControlButtonState('rotate90', 
+        updateControlButtonState('rotate90',
                                  !panelShouldBeDisabled &&
                                  realityBuilder.newBlock().canBeRotated90());
     }
@@ -226,7 +231,7 @@ realityBuilderCom.controlPanel = (function () {
     }
 
     function updateMakeRealButtonState(panelShouldBeDisabled) {
-        makeRealButtonIsEnabled = 
+        makeRealButtonIsEnabled =
             makeRealButtonShouldBeEnabled(panelShouldBeDisabled);
         updateControlButtonState('requestMakeReal', makeRealButtonIsEnabled);
     }
@@ -236,21 +241,25 @@ realityBuilderCom.controlPanel = (function () {
     }
 
     function setUpCoordinateButton(type, deltaB) {
-        setUpControlButton(type,
-                           function () {
-                               if (!isDisabled) {
-                                   realityBuilder.newBlock().move(deltaB);
-                               }
-                           });
+        setUpControlButton(
+            type,
+            function () {
+                if (!isDisabled) {
+                    realityBuilder.newBlock().move(deltaB);
+                }
+            }
+        );
     }
 
     function setUpRotate90Button() {
-        setUpControlButton('rotate90',
-                           function () {
-                               if (!isDisabled) {
-                                   realityBuilder.newBlock().rotate90();
-                               }
-                           });
+        setUpControlButton(
+            'rotate90',
+            function () {
+                if (!isDisabled) {
+                    realityBuilder.newBlock().rotate90();
+                }
+            }
+        );
     }
 
     // Checks if the new block fullfills certain conditions to be made real.
@@ -289,7 +298,7 @@ realityBuilderCom.controlPanel = (function () {
         updateState: function (shouldBeDisabled) {
             if (!shouldBeDisabled) {
                 if (!realityBuilderCom.base.realityBuilderIsReady() ||
-                    realityBuilder.newBlock().isFrozen()) {
+                        realityBuilder.newBlock().isFrozen()) {
                     shouldBeDisabled = true;
                 } else {
                     requestedPosBAndA = null;
@@ -329,11 +338,13 @@ realityBuilderCom.controlPanel = (function () {
 }());
 
 realityBuilderCom.annotationPanel = (function () {
-    var publicInterface, 
-    textareaNode = $('#annotationInputField textarea'),
-    maxNChars = 140,
-    isDisabled = true,
-    onDone; // called when using the annotation panel has been finished
+    'use strict';
+
+    var publicInterface,
+        textareaNode = $('#annotationInputField textarea'),
+        maxNChars = 140,
+        isDisabled = true,
+        onDone; // called when using the annotation panel has been finished
 
     function annotation() {
         var val, blockLabel, text;
@@ -417,15 +428,15 @@ realityBuilderCom.annotationPanel = (function () {
         },
 
         disable: function () {
-            $('#annotationPanel, #annotationInputField, #sendButton, ' + 
-              '#skipButton').addClass('disabled');
+            $('#annotationPanel, #annotationInputField, #sendButton, ' +
+                '#skipButton').addClass('disabled');
             $('#annotationInputField textarea').attr('readonly', 'readonly');
             isDisabled = true;
         },
 
         enable: function () {
-            $('#annotationPanel, #annotationInputField, #sendButton, ' + 
-              '#skipButton').removeClass('disabled');
+            $('#annotationPanel, #annotationInputField, #sendButton, ' +
+                '#skipButton').removeClass('disabled');
             $('#annotationInputField textarea').removeAttr('readonly');
             isDisabled = false;
         },
@@ -439,382 +450,386 @@ realityBuilderCom.annotationPanel = (function () {
 }());
 
 realityBuilderCom.base = (function () {
+    'use strict';
+
     var publicInterface,
-    stillImage = {
-        url: null,
-        blockConfigurationI: null // index of associated block configuration
-    },
-    video = {
-        index: null, // index of current video
-        playingEventProcessed: false, // necessary since the playing event is,
-                                      // as of August 2011, fired twice, at
-                                      // least sometimes
+        stillImage = {
+            url: null,
+            blockConfigurationI: null // index of associated block
+                                      // configuration
+        },
+        video = {
+            index: null, // index of current video
+            playingEventProcessed: false, // necessary since the playing event
+                                          // is, as of August 2011, fired
+                                          // twice, at least sometimes
 
-        // Approximate durations by which a transition video is trimmed at the
-        // start and at the end. Motivation for trimming at the start is having
-        // the user wait less. Motivation for trimming at the end is
-        // suppressing for example the play button flashing up on iOS 4.3 at
-        // the regular end of the video.
-        startTrim: 0.5, // s
-        endTrim: 0.5, // s
+            // Approximate durations by which a transition video is trimmed at
+            // the start and at the end. Motivation for trimming at the start
+            // is having the user wait less. Motivation for trimming at the end
+            // is suppressing for example the play button flashing up on iOS
+            // 4.3 at the regular end of the video.
+            startTrim: 0.5, // s
+            endTrim: 0.5, // s
 
-        timeWhenLastEnded: null,
+            timeWhenLastEnded: null,
 
-        // how often to check whether video has been started:
-        pollTrimmedStartedInterval: 100, // ms
+            // how often to check whether video has been started:
+            pollTrimmedStartedInterval: 100, // ms
 
-        // how often to check whether trimmed video has ended:
-        pollTrimmedEndedInterval: 100, // ms
+            // how often to check whether trimmed video has ended:
+            pollTrimmedEndedInterval: 100, // ms
 
-        // true while the trimmed video is playing:
-        trimmedIsPlaying: false
-    },
-    stillImageTagIsReady = false, // initially only a placeholder is loaded
-    realityBuilderIsReady = false,
+            // true while the trimmed video is playing:
+            trimmedIsPlaying: false
+        },
+        stillImageTagIsReady = false, // initially only a placeholder is loaded
+        realityBuilderIsReady = false,
 
-    // True also shortly before and after a transition video is shown:
-    videoTransitionIsInProgress = false,
+        // True also shortly before and after a transition video is shown:
+        videoTransitionIsInProgress = false,
 
-    transitionIsAnticipated = false, // true after make-real-btn. clicked
-    width = 1024,
-    height = 690,
-    noBlockConfigurationYetLoaded = true,
-    videoPlayer = null,
-    videoPlayerInitialized = false,
-    videoPlayerLeft = '-128', // px
-    videoPlayerTop = '-15', // px
-    initializationVideoVisible = false,
-    realityBuilderVersion, // version of the Reality Builder being used
+        transitionIsAnticipated = false, // true after make-real-btn. clicked
+        width = 1024,
+        height = 690,
+        noBlockConfigurationYetLoaded = true,
+        videoPlayer = null,
+        videoPlayerInitialized = false,
+        videoPlayerLeft = '-128', // px
+        videoPlayerTop = '-15', // px
+        initializationVideoVisible = false,
+        realityBuilderVersion, // version of the Reality Builder being used
 
-    // Indexes of the video clips (= indexes of the configurations in the
-    // configuration sequence). Example:
-    //
-    // {
-    //     '1': {      // source configation
-    //         '2': 3, // destination configuration: clip showing transition
-    //         '15': 4 // destination configuration: clip showing transition
-    //     },
-    //     '3': {
-    //         '5': 8,
-    //         '7': 19
-    //     },
-    //     ...
-    // }
-    videoIndexesList = {
-        '0': {'1': 1, '65': 214, '78': 245, '90': 293, '91': 298, '96': 327},
-        '1': {'2': 2, '47': 140, '51': 154, '63': 204},
-        '2': {'3': 3, '13': 27, '41': 116, '46': 133},
-        '3': {'4': 4, '9': 13, '11': 19, '12': 22},
-        '4': {'5': 5, '7': 8, '8': 10},
-        '5': {'6': 6},
-        '8': {'6': 11},
-        '9': {'5': 14, '10': 16},
-        '10': {'6': 17},
-        '11': {'7': 20},
-        '12': {'8': 23, '10': 25},
-        '13': {'14': 28, '38': 105, '40': 111},
-        '14': {'15': 29, '25': 53, '31': 72, '33': 78, '35': 84, '37': 94},
-        '15': {'16': 30, '20': 37, '22': 40, '24': 46},
-        '16': {'17': 31, '19': 34},
-        '17': {'18': 32},
-        '19': {'18': 35},
-        '20': {'21': 38},
-        '22': {'17': 41, '23': 43},
-        '23': {'18': 44},
-        '24': {'19': 47, '21': 49, '23': 51},
-        '25': {'16': 54, '26': 56, '28': 59, '30': 65},
-        '26': {'27': 57},
-        '28': {'17': 60, '29': 62},
-        '29': {'18': 63},
-        '30': {'19': 66, '27': 68, '29': 70},
-        '31': {'20': 73, '32': 75},
-        '32': {'21': 76},
-        '33': {'26': 79, '34': 81},
-        '34': {'27': 82},
-        '35': {'22': 85, '28': 87, '36': 89},
-        '36': {'23': 90, '29': 92},
-        '37': {'24': 95, '30': 97, '32': 99, '34': 101, '36': 103},
-        '38': {'15': 106, '39': 108},
-        '39': {'16': 109},
-        '40': {'25': 112, '39': 114},
-        '41': {'14': 117, '42': 119, '44': 125, '45': 128},
-        '42': {'25': 120, '43': 122},
-        '43': {'28': 123},
-        '44': {'31': 126},
-        '45': {'35': 129, '43': 131},
-        '46': {'9': 134, '40': 136, '42': 138},
-        '47': {'3': 141, '48': 143, '50': 149},
-        '48': {'4': 144, '49': 146},
-        '49': {'7': 147},
-        '50': {'11': 150, '49': 152},
-        '51': {'13': 155, '52': 157, '62': 199},
-        '52': {'14': 158, '53': 160, '57': 174, '59': 184, '61': 190},
-        '53': {'15': 161, '54': 163, '56': 169},
-        '54': {'20': 164, '55': 166},
-        '55': {'21': 167},
-        '56': {'24': 170, '55': 172},
-        '57': {'31': 175, '54': 177, '58': 179},
-        '58': {'32': 180, '55': 182},
-        '59': {'33': 185, '60': 187},
-        '60': {'34': 188},
-        '61': {'37': 191, '56': 193, '58': 195, '60': 197},
-        '62': {'38': 200, '53': 202},
-        '63': {'41': 205, '52': 207, '64': 209},
-        '64': {'44': 210, '57': 212},
-        '65': {'66': 215, '76': 239},
-        '66': {'67': 216, '73': 228, '75': 234},
-        '67': {'68': 217, '71': 222, '72': 225},
-        '68': {'69': 218, '70': 220},
-        '71': {'69': 223},
-        '72': {'70': 226},
-        '73': {'68': 229, '74': 231},
-        '74': {'70': 232},
-        '75': {'72': 235, '74': 237},
-        '76': {'67': 240, '77': 242},
-        '77': {'71': 243},
-        '78': {'2': 246, '66': 248, '79': 250, '81': 256, '88': 283},
-        '79': {'3': 251, '80': 253},
-        '80': {'12': 254},
-        '81': {'13': 257, '67': 259, '82': 261},
-        '82': {'14': 262, '83': 264, '85': 270, '87': 276},
-        '83': {'33': 265, '84': 267},
-        '84': {'34': 268},
-        '85': {'35': 271, '86': 273},
-        '86': {'36': 274},
-        '87': {'37': 277, '84': 279, '86': 281},
-        '88': {'41': 284, '82': 286, '89': 288},
-        '89': {'45': 289, '85': 291},
-        '90': {'47': 294, '79': 296},
-        '91': {'51': 299, '76': 301, '81': 303, '92': 305},
-        '92': {'52': 306, '82': 308, '93': 310, '95': 320},
-        '93': {'59': 311, '83': 313, '94': 315},
-        '94': {'60': 316, '84': 318},
-        '95': {'61': 321, '87': 323, '94': 325},
-        '96': {'63': 328, '88': 330, '92': 332}
-    },
+        // Indexes of the video clips (= indexes of the configurations in the
+        // configuration sequence). Example:
+        //
+        // {
+        //     '1': {      // source configation
+        //         '2': 3, // destination configuration: clip with transition
+        //         '15': 4 // destination configuration: clip with transition
+        //     },
+        //     '3': {
+        //         '5': 8,
+        //         '7': 19
+        //     },
+        //     ...
+        // }
+        videoIndexesList = {
+            '0': {'1': 1, '65': 214, '78': 245, '90': 293, '91': 298,
+                  '96': 327},
+            '1': {'2': 2, '47': 140, '51': 154, '63': 204},
+            '2': {'3': 3, '13': 27, '41': 116, '46': 133},
+            '3': {'4': 4, '9': 13, '11': 19, '12': 22},
+            '4': {'5': 5, '7': 8, '8': 10},
+            '5': {'6': 6},
+            '8': {'6': 11},
+            '9': {'5': 14, '10': 16},
+            '10': {'6': 17},
+            '11': {'7': 20},
+            '12': {'8': 23, '10': 25},
+            '13': {'14': 28, '38': 105, '40': 111},
+            '14': {'15': 29, '25': 53, '31': 72, '33': 78, '35': 84, '37': 94},
+            '15': {'16': 30, '20': 37, '22': 40, '24': 46},
+            '16': {'17': 31, '19': 34},
+            '17': {'18': 32},
+            '19': {'18': 35},
+            '20': {'21': 38},
+            '22': {'17': 41, '23': 43},
+            '23': {'18': 44},
+            '24': {'19': 47, '21': 49, '23': 51},
+            '25': {'16': 54, '26': 56, '28': 59, '30': 65},
+            '26': {'27': 57},
+            '28': {'17': 60, '29': 62},
+            '29': {'18': 63},
+            '30': {'19': 66, '27': 68, '29': 70},
+            '31': {'20': 73, '32': 75},
+            '32': {'21': 76},
+            '33': {'26': 79, '34': 81},
+            '34': {'27': 82},
+            '35': {'22': 85, '28': 87, '36': 89},
+            '36': {'23': 90, '29': 92},
+            '37': {'24': 95, '30': 97, '32': 99, '34': 101, '36': 103},
+            '38': {'15': 106, '39': 108},
+            '39': {'16': 109},
+            '40': {'25': 112, '39': 114},
+            '41': {'14': 117, '42': 119, '44': 125, '45': 128},
+            '42': {'25': 120, '43': 122},
+            '43': {'28': 123},
+            '44': {'31': 126},
+            '45': {'35': 129, '43': 131},
+            '46': {'9': 134, '40': 136, '42': 138},
+            '47': {'3': 141, '48': 143, '50': 149},
+            '48': {'4': 144, '49': 146},
+            '49': {'7': 147},
+            '50': {'11': 150, '49': 152},
+            '51': {'13': 155, '52': 157, '62': 199},
+            '52': {'14': 158, '53': 160, '57': 174, '59': 184, '61': 190},
+            '53': {'15': 161, '54': 163, '56': 169},
+            '54': {'20': 164, '55': 166},
+            '55': {'21': 167},
+            '56': {'24': 170, '55': 172},
+            '57': {'31': 175, '54': 177, '58': 179},
+            '58': {'32': 180, '55': 182},
+            '59': {'33': 185, '60': 187},
+            '60': {'34': 188},
+            '61': {'37': 191, '56': 193, '58': 195, '60': 197},
+            '62': {'38': 200, '53': 202},
+            '63': {'41': 205, '52': 207, '64': 209},
+            '64': {'44': 210, '57': 212},
+            '65': {'66': 215, '76': 239},
+            '66': {'67': 216, '73': 228, '75': 234},
+            '67': {'68': 217, '71': 222, '72': 225},
+            '68': {'69': 218, '70': 220},
+            '71': {'69': 223},
+            '72': {'70': 226},
+            '73': {'68': 229, '74': 231},
+            '74': {'70': 232},
+            '75': {'72': 235, '74': 237},
+            '76': {'67': 240, '77': 242},
+            '77': {'71': 243},
+            '78': {'2': 246, '66': 248, '79': 250, '81': 256, '88': 283},
+            '79': {'3': 251, '80': 253},
+            '80': {'12': 254},
+            '81': {'13': 257, '67': 259, '82': 261},
+            '82': {'14': 262, '83': 264, '85': 270, '87': 276},
+            '83': {'33': 265, '84': 267},
+            '84': {'34': 268},
+            '85': {'35': 271, '86': 273},
+            '86': {'36': 274},
+            '87': {'37': 277, '84': 279, '86': 281},
+            '88': {'41': 284, '82': 286, '89': 288},
+            '89': {'45': 289, '85': 291},
+            '90': {'47': 294, '79': 296},
+            '91': {'51': 299, '76': 301, '81': 303, '92': 305},
+            '92': {'52': 306, '82': 308, '93': 310, '95': 320},
+            '93': {'59': 311, '83': 313, '94': 315},
+            '94': {'60': 316, '84': 318},
+            '95': {'61': 321, '87': 323, '94': 325},
+            '96': {'63': 328, '88': 330, '92': 332}
+        },
 
-    // Maps from video clip indexes to YouTube IDs:
-    youTubeIds = {
-        '1': 'vnK6qPOn5BQ',
-        '10': 'hFZUbC0iVZU',
-        '101': 'QQC-674emf8',
-        '103': '2NIxIwyoWlo',
-        '105': 'v7IxRZECAp4',
-        '106': '1LMJEMmQRns',
-        '108': 'loneWMBPCu8',
-        '109': 'a4HXAsbWIXk',
-        '11': '23EqgW_GqRo',
-        '111': 'a-F0tAoRnZw',
-        '112': '_TP_cvi1kyg',
-        '114': 'TXa666Wko6c',
-        '116': 'ul5feOFrWIs',
-        '117': 'FWtqUzfWBEM',
-        '119': 'TISHv2FgYEk',
-        '120': 'oKqM33sdep8',
-        '122': 'zN59I4-MfWo',
-        '123': 'ZF0FeJMRPRg',
-        '125': '3vGqYII9jDY',
-        '126': 'oFnLINAlg-U',
-        '128': 'BZKEACyHTp4',
-        '129': 'gqWtaY9T5U4',
-        '13': '3BIUc5TzfsI',
-        '131': 'hmj-8KslY3k',
-        '133': '5E2aB2AHfhI',
-        '134': 'UYgSr_UxcFM',
-        '136': 'O9zkFVYi2b8',
-        '138': 'yABmcVeS3v8',
-        '14': 'PNLAjIBoH_o',
-        '140': 'Rl_xZe-zRiw',
-        '141': 'ShwMsg5Q-xI',
-        '143': '7QYMcVvYgAs',
-        '144': '8BCTpC6KkYQ',
-        '146': 'IMuE7hoUvH8',
-        '147': 'iNoFu2zaFKY',
-        '149': 'k5Ea9ytSkT0',
-        '150': '7jRfrwYzSrI',
-        '152': '4zB5OBw56QU',
-        '154': 'JqzybTdvz5U',
-        '155': '2khKnvYxK4k',
-        '157': 'wJkqB-juLwU',
-        '158': 'XXkcXaKshic',
-        '16': 'Z1zcO-BIwKA',
-        '160': 'zKM8AGDzpMI',
-        '161': 'FnqMLMVOnWY',
-        '163': 'EGQxMxZFF8E',
-        '164': 'hk2rriAGR-0',
-        '166': '6vzLiYbVhp4',
-        '167': 'Z0wmRaVrTW0',
-        '169': 'RlQcHwbGBP0',
-        '17': '9irhpcQA_W8',
-        '170': 'yfhEIyJo5A0',
-        '172': '0YAyL-vyAZg',
-        '174': 'KHOyGymRp60',
-        '175': 'gTkLgoMapMM',
-        '177': 'D-liSDSaP0Y',
-        '179': 'iiYzclgsK-M',
-        '180': 'QCKSQc9o_cg',
-        '182': 'XF6sPJ1-rg8',
-        '184': 'LoX0YkHb0EA',
-        '185': 'TZTgg7WvmpU',
-        '187': 'jwVuFPAEdGo',
-        '188': 'S0CBy86KHvs',
-        '19': 'WsLEGMMRGMY',
-        '190': 'dc-teOhk9yE',
-        '191': '2qPUmkuN2LQ',
-        '193': 'KmmdiZnmDB8',
-        '195': '9Qd11M96SYA',
-        '197': 'Xpzs4ZwRZ5E',
-        '199': 'QIBDLyonuSs',
-        '2': '_EEQX5eeJ68',
-        '20': 'gvhaV6-9BSU',
-        '200': 'HouvKvFnvTk',
-        '202': 'oSSdVZd4qVA',
-        '204': 'SMjwmq3X9lE',
-        '205': '5Cer0u5Mpho',
-        '207': 'KvjN60ROvOk',
-        '209': 'SCXIrM5Hggs',
-        '210': 'mQre7YeOv90',
-        '212': '8WNEweNqyKs',
-        '214': 'HAJZsHUeiac',
-        '215': '-Ps5vW4-V2Q',
-        '216': 'dL-KaCrORmg',
-        '217': 'Cut4vRm9PlI',
-        '218': 'RRuz3gZLJbI',
-        '22': 'oEi5xIhSq3A',
-        '220': 'bNOk7VVLwEg',
-        '222': 'gGfcGvQdF1w',
-        '223': 'oy3Z7PtaORI',
-        '225': 'zzS8vSpPP3M',
-        '226': 'QCSvd4NxQvc',
-        '228': '8cKOM9fTYKs',
-        '229': 'AgOZbRJXU0g',
-        '23': '7Fi1cgeZDXc',
-        '231': 'pof-K33EfE0',
-        '232': 's7f5QpR1hS0',
-        '234': 'NoAahW_LGHg',
-        '235': 'P-tvHgrQk1s',
-        '237': '7nI6WGNiJ9A',
-        '239': 'bpP6OYYf0lY',
-        '240': 'RF7E7q10VF0',
-        '242': 'CuqdddSuU58',
-        '243': 'VXPOYn6E_JQ',
-        '245': 'DR-wPEwnDjc',
-        '246': 'FHgUhThC1lg',
-        '248': 'Jfsx2NKPql4',
-        '25': 'u53pgfT0vcc',
-        '250': '2FpWCRJTaDI',
-        '251': '7pMqPOV8QV4',
-        '253': 'bEOC48eR6Ro',
-        '254': '19OrUtbAi7M',
-        '256': 'pB2Ue66OC60',
-        '257': 'LcScOEXBO9Q',
-        '259': '_6ukoKTxitY',
-        '261': '3vJ0hSwgJmk',
-        '262': 'RAvJ3xAVh8o',
-        '264': 'ZZPQR8LsZ8w',
-        '265': 'zJYcwXYWazs',
-        '267': 'eG2CWiALTNo',
-        '268': 'm6aw9Ou0nuA',
-        '27': '5MAcoO5ywFg',
-        '270': 'Urtqymahdo4',
-        '271': 'sowxY6ZemSA',
-        '273': 'AbVDohfbyYE',
-        '274': 'uY4OU1t2JWU',
-        '276': '0wTDP4sDS_k',
-        '277': 'kfmTgAuD1oU',
-        '279': 'UqmknImAccY',
-        '28': 'qd_H8Mtbp_0',
-        '281': 'FpoYgQsdKew',
-        '283': '2qmRzx6hv04',
-        '284': 'nRNW3YZO3zo',
-        '286': 'l3W7sY_oQMY',
-        '288': '6oo552RCo60',
-        '289': 'PnSZJFOA-_U',
-        '29': 'Xy9b6HPJ2gI',
-        '291': 'tl7G6duQysQ',
-        '293': '9f5JMzaazc8',
-        '294': 'nkdhAPekBX4',
-        '296': '6BpElTgCFpM',
-        '298': '6wh3Z6yGrC8',
-        '299': 'BZWwCT9dtiY',
-        '3': 'UAmPiBrJetk',
-        '30': 'Vu8aaEF4H-c',
-        '301': 'PAAS6SNaixM',
-        '303': '36YNiyrWcpc',
-        '305': 'C54jNFwFdrE',
-        '306': '7-dBiMKk-ko',
-        '308': 'zVykDsCK3io',
-        '31': 'wh824vMFUAo',
-        '310': 'qhBMCFQMfng',
-        '311': 'Bh_u5AoQQfs',
-        '313': 'oS9GUEMD3XE',
-        '315': 'ffFN60qQW8k',
-        '316': 'uYFa05haq2A',
-        '318': '2TYS6AsrQ9E',
-        '32': 'XcsnOJ-h1Gk',
-        '320': 'Kz9eLPoQEAU',
-        '321': 'KS65eqrbPLk',
-        '323': 'ak7jrFKodvs',
-        '325': 'Ec1ymIJmt54',
-        '327': '5_ztJs_MzzQ',
-        '328': 'CUUX6kWkQtE',
-        '330': 'z3mgEbF23Pk',
-        '332': '4BWo528L5MU',
-        '34': 'keJyY5_ljOg',
-        '35': 'yttclxSccPI',
-        '37': 'GPuGZGa9LHU',
-        '38': 'HVe4vIdPzqs',
-        '4': 'cfOPTjmaNcY',
-        '40': 'PnU0Ebo2G84',
-        '41': 'XRkF7fyUkfA',
-        '43': 'Uw9c2PikXNw',
-        '44': 'BaPbKCmIxKI',
-        '46': 'FG0WauNzhaw',
-        '47': '8uIZPVyviSU',
-        '49': 'abGECaX5eQA',
-        '5': 'te6tkwsWihA',
-        '51': 'icjTuUDAgvA',
-        '53': 'ftIR894bSm0',
-        '54': 'YxWO28l3mNQ',
-        '56': 'UoWBeQWSXrA',
-        '57': '4XJmJyJfd7g',
-        '59': 'GSdWvj4dDkg',
-        '6': 'CArC9FF-vDA',
-        '60': '4rRyraBq4R0',
-        '62': 'g6X7pmrJe1o',
-        '63': 'Fn8fAhvv1Sk',
-        '65': 'VqTzBIshd50',
-        '66': 'KyneHRVHjok',
-        '68': 'IiWGcHXEhl4',
-        '70': 'w8Ta5T3DUhs',
-        '72': '2zPKO8S0sNo',
-        '73': '74uGmJSX9RM',
-        '75': 'VSRnmMe4Dqc',
-        '76': 'K_gZH_vAnK4',
-        '78': 'UQi4xNPwXRc',
-        '79': 'evyJba_BOtU',
-        '8': 'WNLZYhEwgu0',
-        '81': '1pA4PT5uCRI',
-        '82': '1NlSopQNvPU',
-        '84': 'VylxU1k8PQk',
-        '85': 'zBjDnb8-Zto',
-        '87': '4cHdscZNTE8',
-        '89': 'VpMOtRRCLA8',
-        '90': 'HP5iI8MREIM',
-        '92': 'TGnkzdr89Og',
-        '94': 'CToZ_OZdGEI',
-        '95': 'WZuuOeLLbO4',
-        '97': 'MNEUcPlU9X8',
-        '99': 'wsBrFRKBez4'
-    };
+        // Maps from video clip indexes to YouTube IDs:
+        youTubeIds = {
+            '1': 'vnK6qPOn5BQ',
+            '10': 'hFZUbC0iVZU',
+            '101': 'QQC-674emf8',
+            '103': '2NIxIwyoWlo',
+            '105': 'v7IxRZECAp4',
+            '106': '1LMJEMmQRns',
+            '108': 'loneWMBPCu8',
+            '109': 'a4HXAsbWIXk',
+            '11': '23EqgW_GqRo',
+            '111': 'a-F0tAoRnZw',
+            '112': '_TP_cvi1kyg',
+            '114': 'TXa666Wko6c',
+            '116': 'ul5feOFrWIs',
+            '117': 'FWtqUzfWBEM',
+            '119': 'TISHv2FgYEk',
+            '120': 'oKqM33sdep8',
+            '122': 'zN59I4-MfWo',
+            '123': 'ZF0FeJMRPRg',
+            '125': '3vGqYII9jDY',
+            '126': 'oFnLINAlg-U',
+            '128': 'BZKEACyHTp4',
+            '129': 'gqWtaY9T5U4',
+            '13': '3BIUc5TzfsI',
+            '131': 'hmj-8KslY3k',
+            '133': '5E2aB2AHfhI',
+            '134': 'UYgSr_UxcFM',
+            '136': 'O9zkFVYi2b8',
+            '138': 'yABmcVeS3v8',
+            '14': 'PNLAjIBoH_o',
+            '140': 'Rl_xZe-zRiw',
+            '141': 'ShwMsg5Q-xI',
+            '143': '7QYMcVvYgAs',
+            '144': '8BCTpC6KkYQ',
+            '146': 'IMuE7hoUvH8',
+            '147': 'iNoFu2zaFKY',
+            '149': 'k5Ea9ytSkT0',
+            '150': '7jRfrwYzSrI',
+            '152': '4zB5OBw56QU',
+            '154': 'JqzybTdvz5U',
+            '155': '2khKnvYxK4k',
+            '157': 'wJkqB-juLwU',
+            '158': 'XXkcXaKshic',
+            '16': 'Z1zcO-BIwKA',
+            '160': 'zKM8AGDzpMI',
+            '161': 'FnqMLMVOnWY',
+            '163': 'EGQxMxZFF8E',
+            '164': 'hk2rriAGR-0',
+            '166': '6vzLiYbVhp4',
+            '167': 'Z0wmRaVrTW0',
+            '169': 'RlQcHwbGBP0',
+            '17': '9irhpcQA_W8',
+            '170': 'yfhEIyJo5A0',
+            '172': '0YAyL-vyAZg',
+            '174': 'KHOyGymRp60',
+            '175': 'gTkLgoMapMM',
+            '177': 'D-liSDSaP0Y',
+            '179': 'iiYzclgsK-M',
+            '180': 'QCKSQc9o_cg',
+            '182': 'XF6sPJ1-rg8',
+            '184': 'LoX0YkHb0EA',
+            '185': 'TZTgg7WvmpU',
+            '187': 'jwVuFPAEdGo',
+            '188': 'S0CBy86KHvs',
+            '19': 'WsLEGMMRGMY',
+            '190': 'dc-teOhk9yE',
+            '191': '2qPUmkuN2LQ',
+            '193': 'KmmdiZnmDB8',
+            '195': '9Qd11M96SYA',
+            '197': 'Xpzs4ZwRZ5E',
+            '199': 'QIBDLyonuSs',
+            '2': '_EEQX5eeJ68',
+            '20': 'gvhaV6-9BSU',
+            '200': 'HouvKvFnvTk',
+            '202': 'oSSdVZd4qVA',
+            '204': 'SMjwmq3X9lE',
+            '205': '5Cer0u5Mpho',
+            '207': 'KvjN60ROvOk',
+            '209': 'SCXIrM5Hggs',
+            '210': 'mQre7YeOv90',
+            '212': '8WNEweNqyKs',
+            '214': 'HAJZsHUeiac',
+            '215': '-Ps5vW4-V2Q',
+            '216': 'dL-KaCrORmg',
+            '217': 'Cut4vRm9PlI',
+            '218': 'RRuz3gZLJbI',
+            '22': 'oEi5xIhSq3A',
+            '220': 'bNOk7VVLwEg',
+            '222': 'gGfcGvQdF1w',
+            '223': 'oy3Z7PtaORI',
+            '225': 'zzS8vSpPP3M',
+            '226': 'QCSvd4NxQvc',
+            '228': '8cKOM9fTYKs',
+            '229': 'AgOZbRJXU0g',
+            '23': '7Fi1cgeZDXc',
+            '231': 'pof-K33EfE0',
+            '232': 's7f5QpR1hS0',
+            '234': 'NoAahW_LGHg',
+            '235': 'P-tvHgrQk1s',
+            '237': '7nI6WGNiJ9A',
+            '239': 'bpP6OYYf0lY',
+            '240': 'RF7E7q10VF0',
+            '242': 'CuqdddSuU58',
+            '243': 'VXPOYn6E_JQ',
+            '245': 'DR-wPEwnDjc',
+            '246': 'FHgUhThC1lg',
+            '248': 'Jfsx2NKPql4',
+            '25': 'u53pgfT0vcc',
+            '250': '2FpWCRJTaDI',
+            '251': '7pMqPOV8QV4',
+            '253': 'bEOC48eR6Ro',
+            '254': '19OrUtbAi7M',
+            '256': 'pB2Ue66OC60',
+            '257': 'LcScOEXBO9Q',
+            '259': '_6ukoKTxitY',
+            '261': '3vJ0hSwgJmk',
+            '262': 'RAvJ3xAVh8o',
+            '264': 'ZZPQR8LsZ8w',
+            '265': 'zJYcwXYWazs',
+            '267': 'eG2CWiALTNo',
+            '268': 'm6aw9Ou0nuA',
+            '27': '5MAcoO5ywFg',
+            '270': 'Urtqymahdo4',
+            '271': 'sowxY6ZemSA',
+            '273': 'AbVDohfbyYE',
+            '274': 'uY4OU1t2JWU',
+            '276': '0wTDP4sDS_k',
+            '277': 'kfmTgAuD1oU',
+            '279': 'UqmknImAccY',
+            '28': 'qd_H8Mtbp_0',
+            '281': 'FpoYgQsdKew',
+            '283': '2qmRzx6hv04',
+            '284': 'nRNW3YZO3zo',
+            '286': 'l3W7sY_oQMY',
+            '288': '6oo552RCo60',
+            '289': 'PnSZJFOA-_U',
+            '29': 'Xy9b6HPJ2gI',
+            '291': 'tl7G6duQysQ',
+            '293': '9f5JMzaazc8',
+            '294': 'nkdhAPekBX4',
+            '296': '6BpElTgCFpM',
+            '298': '6wh3Z6yGrC8',
+            '299': 'BZWwCT9dtiY',
+            '3': 'UAmPiBrJetk',
+            '30': 'Vu8aaEF4H-c',
+            '301': 'PAAS6SNaixM',
+            '303': '36YNiyrWcpc',
+            '305': 'C54jNFwFdrE',
+            '306': '7-dBiMKk-ko',
+            '308': 'zVykDsCK3io',
+            '31': 'wh824vMFUAo',
+            '310': 'qhBMCFQMfng',
+            '311': 'Bh_u5AoQQfs',
+            '313': 'oS9GUEMD3XE',
+            '315': 'ffFN60qQW8k',
+            '316': 'uYFa05haq2A',
+            '318': '2TYS6AsrQ9E',
+            '32': 'XcsnOJ-h1Gk',
+            '320': 'Kz9eLPoQEAU',
+            '321': 'KS65eqrbPLk',
+            '323': 'ak7jrFKodvs',
+            '325': 'Ec1ymIJmt54',
+            '327': '5_ztJs_MzzQ',
+            '328': 'CUUX6kWkQtE',
+            '330': 'z3mgEbF23Pk',
+            '332': '4BWo528L5MU',
+            '34': 'keJyY5_ljOg',
+            '35': 'yttclxSccPI',
+            '37': 'GPuGZGa9LHU',
+            '38': 'HVe4vIdPzqs',
+            '4': 'cfOPTjmaNcY',
+            '40': 'PnU0Ebo2G84',
+            '41': 'XRkF7fyUkfA',
+            '43': 'Uw9c2PikXNw',
+            '44': 'BaPbKCmIxKI',
+            '46': 'FG0WauNzhaw',
+            '47': '8uIZPVyviSU',
+            '49': 'abGECaX5eQA',
+            '5': 'te6tkwsWihA',
+            '51': 'icjTuUDAgvA',
+            '53': 'ftIR894bSm0',
+            '54': 'YxWO28l3mNQ',
+            '56': 'UoWBeQWSXrA',
+            '57': '4XJmJyJfd7g',
+            '59': 'GSdWvj4dDkg',
+            '6': 'CArC9FF-vDA',
+            '60': '4rRyraBq4R0',
+            '62': 'g6X7pmrJe1o',
+            '63': 'Fn8fAhvv1Sk',
+            '65': 'VqTzBIshd50',
+            '66': 'KyneHRVHjok',
+            '68': 'IiWGcHXEhl4',
+            '70': 'w8Ta5T3DUhs',
+            '72': '2zPKO8S0sNo',
+            '73': '74uGmJSX9RM',
+            '75': 'VSRnmMe4Dqc',
+            '76': 'K_gZH_vAnK4',
+            '78': 'UQi4xNPwXRc',
+            '79': 'evyJba_BOtU',
+            '8': 'WNLZYhEwgu0',
+            '81': '1pA4PT5uCRI',
+            '82': '1NlSopQNvPU',
+            '84': 'VylxU1k8PQk',
+            '85': 'zBjDnb8-Zto',
+            '87': '4cHdscZNTE8',
+            '89': 'VpMOtRRCLA8',
+            '90': 'HP5iI8MREIM',
+            '92': 'TGnkzdr89Og',
+            '94': 'CToZ_OZdGEI',
+            '95': 'WZuuOeLLbO4',
+            '97': 'MNEUcPlU9X8',
+            '99': 'wsBrFRKBez4'
+        };
 
     function onBrowserNotSupportedError() {
         // "alert" works also in very old browsers such as Netscape 4.
-        alert('Your web browser is not supported.');
+        window.alert('Your web browser is not supported.');
     }
 
     function onServerError() {
-        alert('Server error.');
+        window.alert('Server error.');
     }
 
     // Unhides the content.
@@ -845,8 +860,8 @@ realityBuilderCom.base = (function () {
     // Unhides the view, if the Reality Builder is ready and if the background
     // image is ready, i.e. has been loaded.
     function unhideViewIfAllReady() {
-        if (realityBuilderIsReady && stillImageTagIsReady && 
-            videoPlayerInitialized) {
+        if (realityBuilderIsReady && stillImageTagIsReady &&
+                videoPlayerInitialized) {
             updateControlPanelState();
             unhideView();
         }
@@ -888,9 +903,7 @@ realityBuilderCom.base = (function () {
         $.each(videoIndexesList, function (key1, videoIndexes) {
             $.each(videoIndexes, function (key2, videoIndex) {
                 destinationConfigurationIndex = parseInt(key2, 10);
-                if (destinationConfigurationIndex === 
-                    configurationIndex) {
-
+                if (destinationConfigurationIndex === configurationIndex) {
                     indexOfVideo = videoIndex;
                     return false;
                 }
@@ -946,10 +959,13 @@ realityBuilderCom.base = (function () {
 
         if (!stillImageTagIsReady) {
             // first image hasn't been loaded yet (only a placeholder)
-            $('#stillImage').one('load', function () { 
-                stillImageTagIsReady = true;
-                unhideViewIfAllReady();
-            });
+            $('#stillImage').one(
+                'load',
+                function () {
+                    stillImageTagIsReady = true;
+                    unhideViewIfAllReady();
+                }
+            );
         }
     }
 
@@ -1035,7 +1051,7 @@ realityBuilderCom.base = (function () {
         if (trimmedVideoHasEnded()) {
             onTrimmedVideoHasEnded();
         } else {
-            setTimeout(checkUntilTrimmedVideoHasEnded, 
+            setTimeout(checkUntilTrimmedVideoHasEnded,
                        video.pollTrimmedEndedInterval);
         }
     }
@@ -1047,7 +1063,7 @@ realityBuilderCom.base = (function () {
         realityBuilderCom.loadIndicator.fadeOutAndStop('fast');
         $('#stillImage').hide();
         renderStillImage();
-        
+
         video.trimmedHasStarted = true;
         checkUntilTrimmedVideoHasEnded();
     }
@@ -1061,7 +1077,7 @@ realityBuilderCom.base = (function () {
             if (trimmedVideoHasStarted()) {
                 onTrimmedVideoHasStarted();
             } else {
-                setTimeout(checkUntilTrimmedVideoHasStarted, 
+                setTimeout(checkUntilTrimmedVideoHasStarted,
                            video.pollTrimmedStartedInterval);
             }
         }
@@ -1090,7 +1106,8 @@ realityBuilderCom.base = (function () {
         realityBuilderCom.controlPanel.disable();
         realityBuilderCom.controlPanel.flipOut(function () {
             realityBuilderCom.annotationPanel.flipIn(
-                realityBuilderCom.annotationPanel.enable);
+                realityBuilderCom.annotationPanel.enable
+            );
         });
     }
 
@@ -1106,7 +1123,7 @@ realityBuilderCom.base = (function () {
     // real. In that case, he should have the option to annotate it.
     function annotationPanelShouldBeShown() {
         var requestedPosBAndA, block, constructionBlocks, prerenderMode,
-        posBAndA, blockProperties;
+            posBAndA, blockProperties;
 
         requestedPosBAndA = realityBuilderCom.controlPanel.requestedPosBAndA();
 
@@ -1189,7 +1206,7 @@ realityBuilderCom.base = (function () {
         var d = event.data;
 
         return (initializationVideoVisible &&
-                (d === YT.PlayerState.BUFFERING || 
+                (d === YT.PlayerState.BUFFERING ||
                  d === YT.PlayerState.PLAYING ||
                  d === YT.PlayerState.ENDED));
     }
@@ -1214,22 +1231,20 @@ realityBuilderCom.base = (function () {
         }
     }
 
-    function transitionVideoExists(prevBlockConfigurationI, 
-                                   blockConfigurationI)
-    {
+    function transitionVideoExists(prevBlockConfigurationI,
+                                   blockConfigurationI) {
         var videoIndex, videoIndexes;
 
-        if (prevBlockConfigurationI in videoIndexesList) {
+        if (videoIndexesList.hasOwnProperty(prevBlockConfigurationI)) {
             videoIndexes = videoIndexesList[prevBlockConfigurationI];
-            return (blockConfigurationI in videoIndexes);
+            return videoIndexes.hasOwnProperty(blockConfigurationI);
         } else {
             return false;
         }
     }
 
     function transitionVideoIndex(prevBlockConfigurationI,
-                                  blockConfigurationI)
-    {
+                                  blockConfigurationI) {
         var videoIndex, videoIndexes;
 
         videoIndexes = videoIndexesList[prevBlockConfigurationI];
@@ -1240,11 +1255,10 @@ realityBuilderCom.base = (function () {
         return i === 0 && !noBlockConfigurationYetLoaded;
     }
 
-    function transitionVideoShouldBeShown(prevBlockConfigurationI, 
-                                          blockConfigurationI)
-    {
+    function transitionVideoShouldBeShown(prevBlockConfigurationI,
+                                          blockConfigurationI) {
         return (stillImageTagIsReady && !videoTransitionIsInProgress &&
-                transitionVideoExists(prevBlockConfigurationI, 
+                transitionVideoExists(prevBlockConfigurationI,
                                       blockConfigurationI));
     }
 
@@ -1264,8 +1278,8 @@ realityBuilderCom.base = (function () {
     // Called also at the very beginning, i.e. when there has been no previous
     // prerendered block configuration displayed (= image tag not yet ready).
     function onPrerenderedBlockConfigurationChanged() {
-        var prevBlockConfigurationI, blockConfigurationI, prerenderMode, 
-        videoIndex;
+        var prevBlockConfigurationI, blockConfigurationI, prerenderMode,
+            videoIndex;
 
         prerenderMode = realityBuilder.prerenderMode();
         blockConfigurationI = prerenderMode.i();
@@ -1281,7 +1295,7 @@ realityBuilderCom.base = (function () {
             loadTransitionVideo(videoIndex);
         } else {
             transitionIsAnticipated = false;
-            stillImage.url = 
+            stillImage.url =
                 stillImageOfBlockConfigurationUrl(blockConfigurationI);
             stillImage.blockConfigurationI = blockConfigurationI;
             renderStillImageUnlessTransitionInProgress();
@@ -1337,8 +1351,8 @@ realityBuilderCom.base = (function () {
                 namespace: realityBuilderVersion + '_reality_builder_com',
                 onReady: onRealityBuilderReady,
                 onBrowserNotSupportedError: onBrowserNotSupportedError,
-                onPrerenderedBlockConfigurationChanged: 
-                onPrerenderedBlockConfigurationChanged,
+                onPrerenderedBlockConfigurationChanged:
+                    onPrerenderedBlockConfigurationChanged,
                 onDegreesOfFreedomChanged: onDegreesOfFreedomChanged,
                 onServerError: onServerError,
                 lineWidthOfBlock: 2
@@ -1362,8 +1376,8 @@ realityBuilderCom.base = (function () {
         //   d/thread/3e65249a4778b07b>
         createVideoPlayer: function () {
             videoPlayer = new YT.Player('videoPlayer', {
-                width: '' + 1280,
-                height: '' + 720,
+                width: '1280',
+                height: '720',
                 videoId: 'zOyaBcUbo94', // placeholder
                 playerVars: {
                     controls: 0,
@@ -1390,10 +1404,14 @@ realityBuilderCom.base = (function () {
 }());
 
 $(function () {
+    'use strict';
+
     realityBuilderCom.loadIndicator.startAndFadeIn(0);
 });
 
 // Called when the YouTube player API is loaded and ready.
 function onYouTubePlayerAPIReady() {
+    'use strict';
+
     realityBuilderCom.base.createVideoPlayer();
 }

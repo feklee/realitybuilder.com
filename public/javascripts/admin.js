@@ -14,26 +14,26 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-/*jslint white: true, onevar: true, undef: true, newcap: true, nomen: true,
-  regexp: true, plusplus: true, bitwise: true, browser: true, nomen: false */
+/*jslint browser: true, maxerr: 50, maxlen: 79, nomen: true */
 
-/*global realityBuilderCom, realityBuilder, $, alert */
+/*global realityBuilderCom, realityBuilder, $ */
 
 realityBuilderCom.admin = (function () {
+    'use strict';
+
     var publicInterface;
 
-    function updateBlocksVisibilityButton(type, text, blocksAreVisible, 
-                                          setVisibility)
-    {
+    function updateBlocksVisibilityButton(type, text, blocksAreVisible,
+                                          setVisibility) {
         var node = $('#' + type + 'BlocksVisibilityButton');
 
         node.
-            text((blocksAreVisible ? "Hide" : "Show") + " " + text + 
+            text((blocksAreVisible ? "Hide" : "Show") + " " + text +
                  " Blocks").
             unbind('click'). // necessary if this code is run several times
-            click(function () { 
+            click(function () {
                 node.unbind('click');
-                setVisibility(!blocksAreVisible); 
+                setVisibility(!blocksAreVisible);
             });
     }
 
@@ -43,7 +43,7 @@ realityBuilderCom.admin = (function () {
         setVisibility = $.proxy(realityBuilder.setRealBlocksVisibility,
                                 realityBuilder);
         blocksAreVisible = realityBuilder.realBlocksAreVisible();
-        updateBlocksVisibilityButton('real', 'Real', 
+        updateBlocksVisibilityButton('real', 'Real',
                                      blocksAreVisible, setVisibility);
     }
 
@@ -53,7 +53,7 @@ realityBuilderCom.admin = (function () {
         setVisibility = $.proxy(realityBuilder.setPendingBlocksVisibility,
                                 realityBuilder);
         blocksAreVisible = realityBuilder.pendingBlocksAreVisible();
-        updateBlocksVisibilityButton('pending', 'Pending', 
+        updateBlocksVisibilityButton('pending', 'Pending',
                                      blocksAreVisible, setVisibility);
     }
 
@@ -67,9 +67,10 @@ realityBuilderCom.admin = (function () {
             "aY": parseFloat($('#cameraAYTextField').val()) || 0,
             "aZ": parseFloat($('#cameraAZTextField').val()) || 0,
             "fl": parseFloat($('#cameraFlTextField').val()) || 1,
-            "sensorResolution": 
-            parseFloat($('#cameraSensorResolutionTextField').val())
-                || 100};
+            "sensorResolution": parseFloat(
+                $('#cameraSensorResolutionTextField').val()
+            ) || 100
+        };
     }
 
     function setUpSaveSettingsButton() {
@@ -120,12 +121,16 @@ realityBuilderCom.admin = (function () {
     function setUpPrerenderModeButtons() {
         var prerenderMode = realityBuilder.prerenderMode();
 
-        $('#setPrerenderedBlockConfigurationButton').click(function () {
-            var i = 
-                parseInt($('#prerenderedBlockConfigurationTextField').val(),
-                         10);
-            prerenderMode.loadBlockConfigurationOnServer(i);
-        }); 
+        $('#setPrerenderedBlockConfigurationButton').click(
+            function () {
+                var i =
+                    parseInt(
+                        $('#prerenderedBlockConfigurationTextField').val(),
+                        10
+                    );
+                prerenderMode.loadBlockConfigurationOnServer(i);
+            }
+        );
         $('#prevPrerenderedBlockConfigurationButton').click(function () {
             prerenderMode.loadPrevBlockConfigurationOnServer();
             updatePrerenderModeControls();
@@ -225,7 +230,7 @@ realityBuilderCom.admin = (function () {
 
         node = $('<tr/>');
         rowValues = [
-            block.xB(), block.yB(), block.zB(), block.a(), 
+            block.xB(), block.yB(), block.zB(), block.a(),
             formattedDateTime(block.timeStamp()), stateSelectorNode(block)];
 
         $.each(rowValues, function (i, rowValue) {
@@ -255,7 +260,7 @@ realityBuilderCom.admin = (function () {
     }
 
     function onJsonpError() {
-        alert('JSONP request failed.');
+        window.alert('JSONP request failed.');
     }
 
     function onReady() {
@@ -290,10 +295,10 @@ realityBuilderCom.admin = (function () {
                 },
                 jsonpTimeout: 20000,
                 onJsonpError: onJsonpError,
-                onRealBlocksVisibilityChanged: 
-                updateRealBlocksVisibilityButton,
-                onPendingBlocksVisibilityChanged: 
-                updatePendingBlocksVisibilityButton,
+                onRealBlocksVisibilityChanged:
+                    updateRealBlocksVisibilityButton,
+                onPendingBlocksVisibilityChanged:
+                    updatePendingBlocksVisibilityButton,
                 onCameraChanged: updateCameraControls,
                 onConstructionBlocksChanged: updateBlocksTable,
                 onMovedOrRotated: updatePosAndADisplay
@@ -305,7 +310,9 @@ realityBuilderCom.admin = (function () {
 }());
 
 $(function () {
+    'use strict';
+
     var settings = realityBuilderCom.admin.settings();
-    
+
     realityBuilder.initialize(settings);
 });
