@@ -39,6 +39,8 @@ Example content:
         "stillImagesBaseUrl": "http://example.com/still_images/"
     }
 
+On GitHub you may find an [archive of still images][3].
+
 
 Twitter OAuth credentials
 =========================
@@ -100,17 +102,17 @@ To make the site work with Internet Explorer versions less than 9, FlashCanvas
 Pro is required. For reasons of license, this library is not included in the
 source code distribution. If desired, install it as follows:
 
- 1. Download [FlashCanvas Pro 1.5 or compatible][3].
+ 1. Download [FlashCanvas Pro 1.5 or compatible][4].
 
  2. Place FlashCanvas Pro into:
 
-        /separate/public/FlashCanvasPro
+        separate/public/FlashCanvasPro
 
 
 Legal
 =====
 
-Copyright 2011-2012 Felix E. Klee [Felix E. Klee][4]
+Copyright 2011-2012 Felix E. Klee [Felix E. Klee][5]
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License. You may obtain a copy of the
@@ -126,5 +128,6 @@ specific language governing permissions and limitations under the License.
 
 [1]: http://code.google.com/p/realitybuildercom
 [2]: https://github.com/feklee/realitybuilder.com
-[3]: http://flashcanvas.net/
-[4]: mailto:felix.klee@inka.de
+[3]: https://github.com/downloads/feklee/realitybuilder.com/still_images.zip
+[4]: http://flashcanvas.net/
+[5]: mailto:felix.klee@inka.de
