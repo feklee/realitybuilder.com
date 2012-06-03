@@ -21,7 +21,8 @@
 var Twitter = require('ntwitter'),
     nconf = require('nconf'),
     twitter,
-    realityBuilderVersion = '1-9-0';
+    realityBuilderVersion = '1-9-0',
+    adminConfig;
 
 nconf.file({file: 'separate/config.json'});
 twitter = new Twitter(nconf.get('twitter'));
@@ -31,6 +32,8 @@ twitter.verifyCredentials(function (errorMessage) {
         process.exit(1);
     }
 });
+
+adminConfig = nconf.get('admin');
 
 // Home page.
 /*jslint unparam:true */
@@ -43,12 +46,41 @@ exports.index = function (req, res) {
     });
 };
 
-exports.admin = function (req, res) {
-    res.redirect('https://' + req.header('Host') + req.url);
-};
+// Returns true, iff the process runs in a production enviroment and the
+// request was via HTTP.
+function httpReqInProductionEnv(req) {
+    return (typeof process.env.NODE_ENV !== 'undefined' &&
+            process.env.NODE_ENV === 'production' &&
+            req.headers.hasOwnProperty('x-forwarded-proto') &&
+            req.headers['x-forwarded-proto'] === 'http');
+}
 
 // Administration interface.
-exports.secureAdmin = function (req, res) {
+exports.admin = function (req, res) {
+    var fixmeText = 'x-forwarded-proto: ';
+
+    if (httpReqInProductionEnv(req)) {
+        // => force access to admin interface via HTTPS in production
+        res.redirect('https://' + req.header('Host') + req.url);
+        return; // fixme
+    }
+
+    res.writeHead(200, {'content-type': 'text/plain'});
+
+    if (req.headers.hasOwnProperty('x-forwarded-proto')) {
+        fixmeText += req.headers['x-forwarded-proto'];
+    } else {
+        fixmeText += 'undefined';
+    }
+    fixmeText += "\nenv: " + process.env.NODE_ENV;
+
+    res.end(fixmeText);
+    return; // fixme
+
+    // In production, makes sure that the admin interface is always accessed
+    // behind HTTPS:
+//fixme:    res.redirect('https://' + req.header('Host') + req.url);
+
     res.render('admin', {
         title: 'Reality Builder Administration',
         realityBuilderVersion: realityBuilderVersion,

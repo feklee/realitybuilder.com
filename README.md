@@ -61,23 +61,6 @@ Example content:
     }
 
 
-SSL certificate for HTTPS
-=========================
-
-The SSL certificate and the associated private key are stored in:
-
-    separate/cert.pem
-    separate/key.pem
-
-A self signed certificate with key (e.g. for testing) may be created as follows
-using OpenSSL:
-
-    $ openssl genrsa -out key.pem
-    $ openssl req -new -key key.pem -out csr.pem
-    $ openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem
-    $ rm csr.pem
-
-
 Admin interface credentials
 ===========================
 
@@ -92,6 +75,20 @@ Example content:
             "username": "123",
             "password": "abc"
         }
+    }
+
+
+Session secret
+==============
+
+The session secret is stored in:
+
+    separate/config.json
+
+Example content:
+
+    {
+        "sessionSecret": "s3cr3t"
     }
 
 
