@@ -102,7 +102,7 @@ exports.verifyAdminPassword = function (req, res) {
     }
 };
 
-// Presentation, as of early 2012 linked from:
+// Linked to from (as of early 2012):
 //
 //   <url:http://prezi.com/3rglon2gvazu/reality-builder/?auth_key=772126086aa01
 //   bb98733b87b6295b6baac03ca72>

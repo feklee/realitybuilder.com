@@ -12,9 +12,9 @@ See also the [repository on GitHub][2].
 Directory separate
 ==================
 
-The directory `separate` is for content that should not be redistributed as
-part of the RealityBuilder.com code, for example due to licensing issues, due
-to size, or because it contains sensitive information.
+The directory `separate` is for content that should not be distributed as part
+of the RealityBuilder.com code, for example due to licensing issues, due to
+size, or because it contains sensitive information.
 
 
 Admin interface
@@ -24,69 +24,54 @@ The date-time in the admin controls is shown in the time zone of the
 system/browser.
 
 
-Still images
-============
+Configuration separate/config.json
+==================================
 
-Still images are not part of the code, due to their size. Download them from
-the RealityBuilder.com code hosting site, and host them wherever you like. The
-location of the still images is stored in:
+The following configuration file is not distributed as part of the
+RealityBuilder.com source code:
 
     separate/config.json
 
-Example content:
 
-    {
-        "stillImagesBaseUrl": "http://example.com/still_images/"
-    }
+Section for still images
+------------------------
+
+Still images are not part of the code, due to their size. Download them from
+the RealityBuilder.com code hosting site, and host them wherever you like.
+Specify the location in `separate/config.json` as follows:
+
+    "stillImagesBaseUrl": "http://example.com/still_images/"
 
 On GitHub you may find an [archive of still images][3].
 
 
 Twitter OAuth credentials
-=========================
+-------------------------
 
-The credentials for Twitter OAuth are stored in:
+Example configuration settings:
 
-    separate/config.json
-
-Example content:
-
-    {
-        "twitter": {
-            "consumer_key": "123",
-            "consumer_secret": "abc",
-            "access_token_key": "987",
-            "access_token_secret": "xyz"
-        }
+    "twitter": {
+        "consumer_key": "123",
+        "consumer_secret": "abc",
+        "access_token_key": "987",
+        "access_token_secret": "xyz"
     }
 
 
 Admin interface password
-========================
+------------------------
 
-The password for accessing `/admin` is stored in:
+Example configuration setting for the password for accessing `/admin`:
 
-    separate/config.json
-
-Example content:
-
-    {
-        "adminPassword": "p4ssw0rd"
-    }
+    "adminPassword": "p4ssw0rd"
 
 
 Session secret
-==============
+--------------
 
-The session secret is stored in:
+Example configuration setting used for session handling:
 
-    separate/config.json
-
-Example content:
-
-    {
-        "sessionSecret": "s3cr3t"
-    }
+    "sessionSecret": "s3cr3t"
 
 
 Internet Explorer support
