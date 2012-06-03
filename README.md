@@ -1,10 +1,7 @@
 Introduction
 ============
 
-This directory is planned to contain code for the next version of the site
-hosted on: RealityBuilder.com
-
-The code of the current version is hosted on [Google Code][1].
+This directory contains code of the site hosted on: [RealityBuilder.com][1]
 
 See also the [repository on GitHub][2].
 
@@ -105,7 +102,7 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 
 
-[1]: http://code.google.com/p/realitybuildercom
+[1]: http://www.RealityBuilder.com
 [2]: https://github.com/feklee/realitybuilder.com
 [3]: https://github.com/downloads/feklee/realitybuilder.com/still_images.zip
 [4]: http://flashcanvas.net/
