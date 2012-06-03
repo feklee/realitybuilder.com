@@ -60,6 +60,14 @@ function userIsAdmin(req) {
             req.session.userIsAdmin);
 }
 
+function logOutRequested(req) {
+    return typeof req.query.log_out !== 'undefined';
+}
+
+function logOutUser(req) {
+    delete req.session.userIsAdmin;
+}
+
 // Redirects to the same page but behind SSL.
 function redirectToHttps(req, res) {
     res.redirect('https://' + req.header('Host') + req.url);
@@ -69,7 +77,10 @@ function redirectToHttps(req, res) {
 exports.admin = function (req, res) {
     if (httpReqInProductionEnv(req)) {
         redirectToHttps(req, res); // force HTTPS in production
-    } else if (!userIsAdmin(req)) {
+    } else if (logOutRequested(req) || !userIsAdmin(req)) {
+        if (logOutRequested(req)) {
+            logOutUser(req);
+        }
         res.render('admin_password_prompt', {
             wrongPassword: typeof req.query.wrong_password !== 'undefined'
         });

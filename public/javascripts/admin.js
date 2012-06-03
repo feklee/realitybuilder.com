@@ -57,6 +57,15 @@ realityBuilderCom.admin = (function () {
                                      blocksAreVisible, setVisibility);
     }
 
+    // Logs the administrator out, sending him back to the login screen.
+    function logOut() {
+        location.href = '/admin?log_out';
+    }
+
+    function setUpLogOutButton() {
+        $('#logOutButton').click(logOut);
+    }
+
     // Returns data read entered using the camera controls.
     function cameraDataFromControls() {
         return {
@@ -264,6 +273,7 @@ realityBuilderCom.admin = (function () {
     }
 
     function onReady() {
+        setUpLogOutButton();
         setUpSaveSettingsButton();
         setUpPreviewCameraButton();
         setUpPrerenderModeButtons();
