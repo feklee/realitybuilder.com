@@ -22,11 +22,11 @@ app.configure(function () {
     app.use(express.bodyParser());
     app.use(express.methodOverride());
     app.use(require('stylus').middleware({src: __dirname + '/public'}));
+    app.use(express.cookieParser());
+    app.use(express.session({secret: nconf.get('sessionSecret')}));
     app.use(app.router);
     app.use(express['static'](__dirname + '/public'));
     app.use(express['static'](__dirname + '/separate/public'));
-    app.use(express.cookieParser());
-    app.use(express.session({secret: nconf.get('sessionSecret')}));
 });
 
 app.configure('development', function () {
@@ -47,6 +47,7 @@ app.get('/', routes.index);
 app.get('/presentation', routes.presentation);
 app.post('/twitter', routes.twitter);
 app.get('/admin', routes.admin);
+app.post('/admin', routes.verifyAdminPassword);
 
 function onListening(app) {
     console.log("Express server listening on port %d in %s mode",

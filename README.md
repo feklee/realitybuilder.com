@@ -61,20 +61,17 @@ Example content:
     }
 
 
-Admin interface credentials
-===========================
+Admin interface password
+========================
 
-The credentials for accessing `/admin` are stored in:
+The password for accessing `/admin` is stored in:
 
     separate/config.json
 
 Example content:
 
     {
-        "admin": {
-            "username": "123",
-            "password": "abc"
-        }
+        "adminPassword": "p4ssw0rd"
     }
 
 

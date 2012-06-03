@@ -22,7 +22,7 @@ var Twitter = require('ntwitter'),
     nconf = require('nconf'),
     twitter,
     realityBuilderVersion = '1-9-0',
-    adminConfig;
+    adminPassword;
 
 nconf.file({file: 'separate/config.json'});
 twitter = new Twitter(nconf.get('twitter'));
@@ -33,7 +33,7 @@ twitter.verifyCredentials(function (errorMessage) {
     }
 });
 
-adminConfig = nconf.get('admin');
+adminPassword = nconf.get('adminPassword');
 
 // Home page.
 /*jslint unparam:true */
@@ -55,37 +55,40 @@ function httpReqInProductionEnv(req) {
             req.headers['x-forwarded-proto'] === 'http');
 }
 
+function userIsAdmin(req) {
+    return (typeof req.session.userIsAdmin !== 'undefined' &&
+            req.session.userIsAdmin);
+}
+
+// Redirects to the same page but behind SSL.
+function redirectToHttps(req, res) {
+    res.redirect('https://' + req.header('Host') + req.url);
+}
+
 // Administration interface.
 exports.admin = function (req, res) {
-    var fixmeText = 'x-forwarded-proto: ';
-
     if (httpReqInProductionEnv(req)) {
-        // => force access to admin interface via HTTPS in production
-        res.redirect('https://' + req.header('Host') + req.url);
-        return; // fixme
-    }
-
-    res.writeHead(200, {'content-type': 'text/plain'});
-
-    if (req.headers.hasOwnProperty('x-forwarded-proto')) {
-        fixmeText += req.headers['x-forwarded-proto'];
+        redirectToHttps(req, res); // force HTTPS in production
+    } else if (!userIsAdmin(req)) {
+        res.render('admin_password_prompt', {
+            wrongPassword: typeof req.query.wrong_password !== 'undefined'
+        });
     } else {
-        fixmeText += 'undefined';
+        res.render('admin', {
+            title: 'Reality Builder Administration',
+            realityBuilderVersion: realityBuilderVersion,
+            stillImagesBaseUrl: nconf.get('stillImages').baseUrl
+        });
     }
-    fixmeText += "\nenv: " + process.env.NODE_ENV;
+};
 
-    res.end(fixmeText);
-    return; // fixme
-
-    // In production, makes sure that the admin interface is always accessed
-    // behind HTTPS:
-//fixme:    res.redirect('https://' + req.header('Host') + req.url);
-
-    res.render('admin', {
-        title: 'Reality Builder Administration',
-        realityBuilderVersion: realityBuilderVersion,
-        stillImagesBaseUrl: nconf.get('stillImages').baseUrl
-    });
+exports.verifyAdminPassword = function (req, res) {
+    if (req.body.password && req.body.password === adminPassword) {
+        req.session.userIsAdmin = true;
+        res.redirect(req.route.path);
+    } else {
+        res.redirect(req.route.path + '?wrong_password');
+    }
 };
 
 // Presentation, as of early 2012 linked from:
