@@ -77,10 +77,10 @@ function redirectToHttps(req, res) {
 exports.admin = function (req, res) {
     if (httpReqInProductionEnv(req)) {
         redirectToHttps(req, res); // force HTTPS in production
-    } else if (logOutRequested(req) || !userIsAdmin(req)) {
-        if (logOutRequested(req)) {
-            logOutUser(req);
-        }
+    } else if (logOutRequested(req)) {
+        logOutUser(req);
+        res.redirect(req.route.path);
+    } else if (!userIsAdmin(req)) {
         res.render('admin_password_prompt', {
             wrongPassword: typeof req.query.wrong_password !== 'undefined'
         });
