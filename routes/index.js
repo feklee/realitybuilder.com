@@ -19,13 +19,12 @@
 'use strict';
 
 var Twitter = require('ntwitter'),
-    nconf = require('nconf'),
+    config = require('../separate/config.json'),
     twitter,
     realityBuilderVersion = '1-9-0',
     adminPassword;
 
-nconf.file({file: 'separate/config.json'});
-twitter = new Twitter(nconf.get('twitter'));
+twitter = new Twitter(config.twitter);
 twitter.verifyCredentials(function (errorMessage) {
     if (errorMessage) {
         console.log('Verifying Twitter credentials failed: ' + errorMessage);
@@ -33,7 +32,7 @@ twitter.verifyCredentials(function (errorMessage) {
     }
 });
 
-adminPassword = nconf.get('adminPassword');
+adminPassword = config.adminPassword;
 
 // Home page.
 /*jslint unparam:true */
@@ -42,7 +41,7 @@ exports.index = function (req, res) {
     res.render('index', {
         title: 'Reality Builder',
         realityBuilderVersion: realityBuilderVersion,
-        stillImagesBaseUrl: nconf.get('stillImages').baseUrl
+        stillImagesBaseUrl: config.stillImagesBaseUrl
     });
 };
 
@@ -88,7 +87,7 @@ exports.admin = function (req, res) {
         res.render('admin', {
             title: 'Reality Builder Administration',
             realityBuilderVersion: realityBuilderVersion,
-            stillImagesBaseUrl: nconf.get('stillImages').baseUrl
+            stillImagesBaseUrl: config.stillImagesBaseUrl
         });
     }
 };
