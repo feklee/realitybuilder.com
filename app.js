@@ -6,8 +6,18 @@ var express = require('express'),
     routes = require('./routes'),
     app = module.exports = express.createServer(),
     fs = require('fs'),
+    forceDomain = require('connect-force-domain'),
     config = require('./separate/config.json');
 
+
+function prependWwwToRealitybuilderCom(req, res, next) {
+    if (req.headers.host.split(':', 1)[0].toLowerCase() ===
+            'realitybuilder.com') {
+        res.header('Location', 'http://www.realitybuilder.com' + req.url);
+        return res.send(301);
+    }
+    next();
+}
 
 // Configuration
 
@@ -22,9 +32,11 @@ app.configure(function () {
     app.use(require('stylus').middleware({src: __dirname + '/public'}));
     app.use(express.cookieParser());
     app.use(express.session({secret: config.sessionSecret}));
+    app.use(prependWwwToRealitybuilderCom);
     app.use(app.router);
     app.use(express['static'](__dirname + '/public'));
     app.use(express['static'](__dirname + '/separate/public'));
+    app.use(forceDomain('www.realitybuilder.com'));
 });
 
 app.configure('development', function () {

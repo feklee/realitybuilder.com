@@ -29,46 +29,32 @@ RealityBuilder.com source code:
 
     separate/config.json
 
+Sections, by examples:
 
-Section for still images
-------------------------
+  * Still images are not part of the code, due to their size. Download them
+    from the RealityBuilder.com code hosting site, and host them wherever you
+    like. Specify the location in `separate/config.json` as follows:
 
-Still images are not part of the code, due to their size. Download them from
-the RealityBuilder.com code hosting site, and host them wherever you like.
-Specify the location in `separate/config.json` as follows:
+        "stillImagesBaseUrl": "http://example.com/still_images/"
 
-    "stillImagesBaseUrl": "http://example.com/still_images/"
+    On GitHub you may find an [archive of still images][3].
 
-On GitHub you may find an [archive of still images][3].
+  * Twitter OAuth credentials:
 
+        "twitter": {
+            "consumer_key": "123",
+            "consumer_secret": "abc",
+            "access_token_key": "987",
+            "access_token_secret": "xyz"
+        }
 
-Twitter OAuth credentials
--------------------------
+  * Password for accessing `/admin`:
 
-Example configuration settings:
+        "adminPassword": "p4ssw0rd"
 
-    "twitter": {
-        "consumer_key": "123",
-        "consumer_secret": "abc",
-        "access_token_key": "987",
-        "access_token_secret": "xyz"
-    }
+  * Secret for session handling:
 
-
-Admin interface password
-------------------------
-
-Example configuration setting for the password for accessing `/admin`:
-
-    "adminPassword": "p4ssw0rd"
-
-
-Session secret
---------------
-
-Example configuration setting used for session handling:
-
-    "sessionSecret": "s3cr3t"
+        "sessionSecret": "s3cr3t"
 
 
 Internet Explorer support
