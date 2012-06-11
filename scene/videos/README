@@ -1,0 +1,155 @@
+Files
+=====
+
+* placeholder.vf: Sony Vegas project file for rendering a placeholder video,
+  that may be loaded at the beginning.
+
+
+How video clips were created
+============================
+
+1. Vegas Movie Studio 9.0 (could have also used Vegas Pro 9.0):
+
+  a) Set up a project with a size of 1024x720 square pixels. Note that in the
+    Reality Builder only 690 vertical pixels will be visible: The top 15 and
+    the bottom 15 pixels will be cut off.
+
+  b) Placed markers named "start"/"end" at the latest start and earliest end of
+    actions. The latest start and earliest end is defined to be when a part of
+    me or the block that I'm carying gets visible in the scene. A shadow
+    doesn't count as part.
+
+    Result: Step 1.vf
+
+2. Vegas Pro 9.0:
+
+  a) Converted markers to regions, using scripting:
+
+    Markers to Regions.js
+
+  b) Named regions with the index of the respective configuration transition.
+    Added/removed some regions where markers had not been correctly set
+    earlier.
+
+    Result: Step 2.veg
+
+  c) Padded regions, using scripting:
+
+    Pad Regions.js
+
+    Result: Step 3.veg
+
+3. Batch rendered, using scripting:
+
+    Batch Render Clips.cs
+
+4. Uploaded to YouTube, from Windows XP command prompt:
+
+    Upload.bat
+
+5. Went through the log and looked for files where no video URL was listed. For
+  these files upload failed. I reuploaded them and added the new URLs to the
+  log.
+
+6. On YouTube:
+
+  - Verified that the number of videos is correct.
+
+  - Changed privacy to: Unlisted
+
+  - Changed license to: Creative Commons (CC-BY)
+
+
+Video rendering settings for Sony Vegas Pro 9.0
+===============================================
+
+Notes:
+
+* Audio has to be on, to avoid issue with gray video beginning:
+
+  http://www.google.com/support/forum/p/youtube/thread?tid=782af5e328201258
+
+* Using a bitrate as low as 1.000.000 doesn't result in much smaller videos on
+  YouTube, as tested with Chrome YouTube Downloader. YouTube currently seems to
+  encode at a bitrate between 1 and 2 Mbps.
+
+Settings for Sony AVC:
+
+* Video:
+
+  [x] Include video
+  Video format: AVC
+  Frame size: 1280x720
+  Profile: Main
+  Entropy coding: CABAC
+  Frame rate: 25,000 (PAL)
+  [ ] Allow source to adjust frame rate
+  Field order: None (progressive scan)
+  Pixel aspect ratio: 1
+  Bit rate (bps): 2.000.000
+
+* Audio:
+
+  [x] Include audio
+  Audio format: AAC
+  Sample rate (Hz): 48.000
+  Bit rate (bps): 64.000
+  Audio coding mode: Stereo
+
+* System:
+  
+  Format: MP4 file format (.mp4)
+
+* Project:
+
+  Video Rendering Quality: Good
+
+
+How still images were created
+=============================
+
+1. Vegas Pro 9.0:
+
+  a) Opened the file that was used for rending the video clips:
+
+    Step 3.veg
+
+  b) Created the snapshots, using scripting:
+
+    Create Still Images.js
+
+2. Adjusted the JPEG quality for faster loading:
+
+  Adjust JPEG Quality.bat
+
+3. Placed the files in:
+
+  /separate/still_images
+
+4. Uploaded archives of the files to Google Code Project Hosting.
+
+
+Legal
+=====
+
+Copyright 2011 Felix E. Klee <felix.klee@inka.de>
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
+-- 
+The following settings are interpreted by EMACS, do not remove them.
+Local Variables:
+mode:text
+fill-column:79
+coding: utf-8
+End:
+Local IspellDict: american

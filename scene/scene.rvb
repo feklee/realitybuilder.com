@@ -1,0 +1,497 @@
+' Renders block configurations in Rhino 3.0.
+'
+' 2011, Felix E. Klee <felix.klee@inka.de>
+
+' Returns the world space coordinates of a point at the provided block space
+' coordinates.
+Function MyBlockToWorld(positionB)
+    MyBlockToWorld = Array(positionB(0), positionB(1), positionB(2) / 2)
+End Function
+
+' Draws the block at the provided block space position, and rotated by the
+' provided angle (0 or 1, times 90°)
+Sub MyDrawBlock(positionBAndA)
+    Dim xB, yB, zB, a, d
+
+    xB = positionBAndA(0)
+    yB = positionBAndA(1)
+    zB = positionBAndA(2)
+    a = positionBAndA(3)
+
+    ' delta by which blocks are made smaller, for better visual separation:
+    d = 0.01
+    
+    If a = 0 Then
+        Rhino.addBox Array(MyBlockToWorld(Array(xB + d, yB + d, zB + d)), _
+                           MyBlockToWorld(Array(xB + 2 - d, yB + d, zB + d)), _
+                           MyBlockToWorld(Array(xB + 2 - d, yB + 1 - d, _
+                                              zB + d)), _
+                           MyBlockToWorld(Array(xB + d, yB + 1 - d, zB + d)), _
+                           MyBlockToWorld(Array(xB + d, yB + d, zB + 1 - d)), _
+                           MyBlockToWorld(Array(xB + 2 - d, yB + d, _
+                                              zB + 1 - d)), _
+                           MyBlockToWorld(Array(xB + 2 - d, yB + 1 - d, _
+                                              zB + 1 - d)), _
+                           MyBlockToWorld(Array(xB + d, yB + 1 - d, _
+                                                zB + 1 - d)))
+    Else
+        Rhino.addBox Array(MyBlockToWorld(Array(xB + d, yB + d, zB + d)), _
+                           MyBlockToWorld(Array(xB + 1 - d, yB + d, zB + d)), _
+                           MyBlockToWorld(Array(xB + 1 - d, yB + 2 - d, _
+                                              zB + d)), _
+                           MyBlockToWorld(Array(xB + d, yB + 2 - d, zB + d)), _
+                           MyBlockToWorld(Array(xB + d, yB + d, zB + 1 - d)), _
+                           MyBlockToWorld(Array(xB + 1 - d, yB + d, _
+                                              zB + 1 - d)), _
+                           MyBlockToWorld(Array(xB + 1 - d, yB + 2 - d, _
+                                              zB + 1 - d)), _
+                           MyBlockToWorld(Array(xB + d, yB + 2 - d, _
+                                                zB + 1 - d)))
+    End If
+End Sub
+
+Sub MyDeleteAllBlocks()
+    Dim blocks
+    blocks = Rhino.ObjectsByType(16)
+    If IsArray(blocks) Then
+        Rhino.DeleteObjects blocks
+    End If
+End Sub
+
+' Returns the current index of the scene / block configuration. Defaults to 0,
+' if the index is not stored in the current document.
+Function MyIndex()
+    Dim tmp
+
+    tmp = Rhino.GetDocumentData("BlockConfigurations", "Index")
+
+    If Not IsNull(tmp) Then
+        MyIndex = Int(tmp)
+    Else
+        MyIndex = 0
+    End If
+End Function
+
+Sub MySetIndex(index)
+    Rhino.SetDocumentData "BlockConfigurations", "Index", index
+End Sub
+
+Sub MyPrintInfo(i)
+    Dim augmentedConfiguration, prevAugmentedConfiguration, _
+        configurationIndex, prevConfigurationIndex, transitionText, _
+        configuration, prevConfiguration, length, prevLength
+
+    If i = 0 Then
+        transitionText = "preparation"
+    Else
+        augmentedConfiguration = myAugmentedConfigurationSequence(i)
+        configurationIndex = augmentedConfiguration(0)
+        configuration = augmentedConfiguration(1)
+
+        prevAugmentedConfiguration = myAugmentedConfigurationSequence(i-1)
+        prevConfigurationIndex = prevAugmentedConfiguration(0)
+        prevConfiguration = prevAugmentedConfiguration(1)
+
+        If UBound(prevConfiguration) > UBound(configuration) Then
+            transitionText = "preparation"
+        Else
+            transitionText = prevConfigurationIndex & " -> " & _
+                           configurationIndex
+        End If
+    End if
+        
+    Rhino.Print i & ": " & transitionText
+End Sub
+
+' Redraws all blocks for the block configuration with index "i".
+Sub MyDrawScene(i)
+    Dim configuration, augmentedConfiguration
+
+    MyDeleteAllBlocks
+
+    augmentedConfiguration = myAugmentedConfigurationSequence(i)
+    configuration = augmentedConfiguration(1)
+    For Each positionBAndA in configuration
+        MyDrawBlock positionBAndA
+    Next
+
+    MyPrintInfo(i)
+End Sub
+
+Sub MyPrevScene
+    Dim i
+    i = MyIndex() - 1
+    If i < 0 Then i = 0
+    MyDrawScene(i)
+    MySetIndex i
+End Sub
+
+Sub MyNextScene
+    Dim i
+    i = MyIndex() + 1
+    If i > UBound(myAugmentedConfigurationSequence) Then
+        i = UBound(myAugmentedConfigurationSequence)
+    End If
+    MyDrawScene(i)
+    MySetIndex i
+End Sub
+
+Sub MyFirstScene
+    MyDrawScene(0)
+    MySetIndex 0
+End Sub
+
+Sub MyLastScene
+    Dim i
+    i = UBound(myAugmentedConfigurationSequence)
+    MyDrawScene(i)
+    MySetIndex i
+End Sub
+
+Sub MyGotoScene
+    Dim i, iMax
+    iMax = UBound(myAugmentedConfigurationSequence)
+    i = Rhino.GetInteger("Index", MyIndex(), 0, iMax)
+    If Not IsNull(i) Then
+        MyDrawScene(i)
+        MySetIndex i
+    End If
+End Sub
+
+Dim myAugmentedConfigurationSequence
+
+myAugmentedConfigurationSequence = _
+Array( _
+Array(0, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0))), _
+Array(1, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0))), _
+Array(2, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1))), _
+Array(3, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0))), _
+Array(4, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(0, 0, 2, 1))), _
+Array(5, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(0, 0, 2, 1), Array(1, 0, 2, 0))), _
+Array(6, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(0, 0, 2, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0))), _
+Array(4, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(0, 0, 2, 1))), _
+Array(7, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(0, 0, 2, 1), Array(1, 0, 2, 1))), _
+Array(4, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(0, 0, 2, 1))), _
+Array(8, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(0, 0, 2, 1), Array(1, 1, 2, 0))), _
+Array(6, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(0, 0, 2, 1), Array(1, 1, 2, 0), Array(1, 0, 2, 0))), _
+Array(3, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0))), _
+Array(9, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 0, 2, 0))), _
+Array(5, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 0, 2, 0), Array(0, 0, 2, 1))), _
+Array(9, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 0, 2, 0))), _
+Array(10, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 0, 2, 0), Array(1, 1, 2, 0))), _
+Array(6, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 0, 2, 0), Array(1, 1, 2, 0), Array(0, 0, 2, 1))), _
+Array(3, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0))), _
+Array(11, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 0, 2, 1))), _
+Array(7, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 0, 2, 1), Array(0, 0, 2, 1))), _
+Array(3, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0))), _
+Array(12, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 1, 2, 0))), _
+Array(8, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 1, 2, 0), Array(0, 0, 2, 1))), _
+Array(12, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 1, 2, 0))), _
+Array(10, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 1, 2, 0), Array(1, 0, 2, 0))), _
+Array(2, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1))), _
+Array(13, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(14, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(15, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(16, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 0))), _
+Array(17, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0))), _
+Array(18, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(16, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 0))), _
+Array(19, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 0), Array(0, 2, 2, 0))), _
+Array(18, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 0), Array(0, 2, 2, 0), Array(1, 1, 2, 0))), _
+Array(15, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(20, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 1))), _
+Array(21, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 1), Array(0, 2, 2, 0))), _
+Array(15, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(22, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 1, 2, 0))), _
+Array(17, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 1, 2, 0), Array(1, 0, 2, 0))), _
+Array(22, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 1, 2, 0))), _
+Array(23, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(18, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 1, 2, 0), Array(0, 2, 2, 0), Array(1, 0, 2, 0))), _
+Array(15, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(24, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(0, 2, 2, 0))), _
+Array(19, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(0, 2, 2, 0), Array(1, 0, 2, 0))), _
+Array(24, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(0, 2, 2, 0))), _
+Array(21, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(0, 2, 2, 0), Array(1, 0, 2, 1))), _
+Array(24, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(0, 2, 2, 0))), _
+Array(23, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(0, 2, 2, 0), Array(1, 1, 2, 0))), _
+Array(14, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(25, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0))), _
+Array(16, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 0, 2, 1))), _
+Array(25, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0))), _
+Array(26, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 1, 2, 0))), _
+Array(27, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(25, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0))), _
+Array(28, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0))), _
+Array(17, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0), Array(0, 0, 2, 1))), _
+Array(28, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0))), _
+Array(29, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(18, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0), Array(0, 2, 2, 0), Array(0, 0, 2, 1))), _
+Array(25, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0))), _
+Array(30, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 2, 2, 0))), _
+Array(19, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 2, 2, 0), Array(0, 0, 2, 1))), _
+Array(30, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 2, 2, 0))), _
+Array(27, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 2, 2, 0), Array(0, 1, 2, 0))), _
+Array(30, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 2, 2, 0))), _
+Array(29, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 2, 2, 0), Array(1, 1, 2, 0))), _
+Array(14, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(31, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1))), _
+Array(20, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(0, 0, 2, 1))), _
+Array(31, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1))), _
+Array(32, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(0, 2, 2, 0))), _
+Array(21, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(0, 2, 2, 0), Array(0, 0, 2, 1))), _
+Array(14, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(33, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(26, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(1, 0, 2, 0))), _
+Array(33, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(34, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(27, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 2, 2, 0), Array(1, 0, 2, 0))), _
+Array(14, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(35, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0))), _
+Array(22, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 0, 2, 1))), _
+Array(35, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0))), _
+Array(28, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(1, 0, 2, 0))), _
+Array(35, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0))), _
+Array(36, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(23, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 2, 2, 0), Array(0, 0, 2, 1))), _
+Array(36, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(29, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 2, 2, 0), Array(1, 0, 2, 0))), _
+Array(14, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(37, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(24, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(0, 0, 2, 1))), _
+Array(37, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(30, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(1, 0, 2, 0))), _
+Array(37, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(32, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(1, 0, 2, 1))), _
+Array(37, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(34, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(0, 1, 2, 0))), _
+Array(37, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(36, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(1, 1, 2, 0))), _
+Array(13, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(38, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(15, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 1, 1, 1))), _
+Array(38, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(39, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 0))), _
+Array(16, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 0), Array(1, 1, 1, 1))), _
+Array(13, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(40, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 0, 2, 0))), _
+Array(25, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 1, 1))), _
+Array(40, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 0, 2, 0))), _
+Array(39, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 0, 2, 1))), _
+Array(2, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1))), _
+Array(41, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1))), _
+Array(14, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 1, 1))), _
+Array(41, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1))), _
+Array(42, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0))), _
+Array(25, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 1, 1, 1))), _
+Array(42, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0))), _
+Array(43, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0))), _
+Array(28, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0), Array(0, 1, 1, 1))), _
+Array(41, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1))), _
+Array(44, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1))), _
+Array(31, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(0, 1, 1, 1))), _
+Array(41, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1))), _
+Array(45, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0))), _
+Array(35, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 1, 1, 1))), _
+Array(45, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0))), _
+Array(43, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(1, 0, 2, 0))), _
+Array(2, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1))), _
+Array(46, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 0, 2, 0))), _
+Array(9, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 0, 2, 0), Array(0, 1, 1, 0))), _
+Array(46, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 0, 2, 0))), _
+Array(40, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 0, 2, 0), Array(0, 1, 1, 1))), _
+Array(46, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 0, 2, 0))), _
+Array(42, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(2, 0, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 1, 1))), _
+Array(1, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0))), _
+Array(47, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0))), _
+Array(3, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0), Array(2, 0, 1, 1))), _
+Array(47, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0))), _
+Array(48, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0), Array(0, 0, 2, 1))), _
+Array(4, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0), Array(0, 0, 2, 1), Array(2, 0, 1, 1))), _
+Array(48, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0), Array(0, 0, 2, 1))), _
+Array(49, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0), Array(0, 0, 2, 1), Array(1, 0, 2, 1))), _
+Array(7, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0), Array(0, 0, 2, 1), Array(1, 0, 2, 1), Array(2, 0, 1, 1))), _
+Array(47, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0))), _
+Array(50, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0), Array(1, 0, 2, 1))), _
+Array(11, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0), Array(1, 0, 2, 1), Array(2, 0, 1, 1))), _
+Array(50, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0), Array(1, 0, 2, 1))), _
+Array(49, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 0), Array(1, 0, 2, 1), Array(0, 0, 2, 1))), _
+Array(1, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0))), _
+Array(51, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1))), _
+Array(13, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(2, 0, 1, 1))), _
+Array(51, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1))), _
+Array(52, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(14, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(2, 0, 1, 1))), _
+Array(52, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(53, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(15, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(2, 0, 1, 1))), _
+Array(53, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(54, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 1))), _
+Array(20, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 1), Array(2, 0, 1, 1))), _
+Array(54, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 1))), _
+Array(55, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 1), Array(0, 2, 2, 0))), _
+Array(21, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 0, 2, 1), Array(0, 2, 2, 0), Array(2, 0, 1, 1))), _
+Array(53, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(56, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(0, 2, 2, 0))), _
+Array(24, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(0, 2, 2, 0), Array(2, 0, 1, 1))), _
+Array(56, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(0, 2, 2, 0))), _
+Array(55, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 2, 1), Array(0, 2, 2, 0), Array(1, 0, 2, 1))), _
+Array(52, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(57, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1))), _
+Array(31, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(2, 0, 1, 1))), _
+Array(57, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1))), _
+Array(54, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(0, 0, 2, 1))), _
+Array(57, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1))), _
+Array(58, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(0, 2, 2, 0))), _
+Array(32, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(0, 2, 2, 0), Array(2, 0, 1, 1))), _
+Array(58, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(0, 2, 2, 0))), _
+Array(55, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(0, 2, 2, 0), Array(0, 0, 2, 1))), _
+Array(52, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(59, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(33, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(2, 0, 1, 1))), _
+Array(59, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(60, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(34, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 2, 2, 0), Array(2, 0, 1, 1))), _
+Array(52, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(61, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(37, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(2, 0, 1, 1))), _
+Array(61, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(56, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(0, 0, 2, 1))), _
+Array(61, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(58, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(1, 0, 2, 1))), _
+Array(61, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(60, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(0, 1, 2, 0))), _
+Array(51, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1))), _
+Array(62, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(38, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(0, 0, 2, 1), Array(2, 0, 1, 1))), _
+Array(62, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(0, 0, 2, 1))), _
+Array(53, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(0, 1, 1, 1), Array(0, 0, 2, 1), Array(1, 1, 1, 1))), _
+Array(1, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0))), _
+Array(63, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(1, 1, 1, 1))), _
+Array(41, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(1, 1, 1, 1), Array(2, 0, 1, 1))), _
+Array(63, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(1, 1, 1, 1))), _
+Array(52, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(1, 1, 1, 1), Array(0, 1, 1, 1))), _
+Array(63, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(1, 1, 1, 1))), _
+Array(64, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(1, 1, 1, 1), Array(1, 0, 2, 1))), _
+Array(44, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(2, 0, 1, 1))), _
+Array(64, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(1, 1, 1, 1), Array(1, 0, 2, 1))), _
+Array(57, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 0, 1, 0), Array(1, 1, 1, 1), Array(1, 0, 2, 1), Array(0, 1, 1, 1))), _
+Array(0, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0))), _
+Array(65, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1))), _
+Array(66, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1))), _
+Array(67, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(68, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 0, 2, 0))), _
+Array(69, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 0, 2, 0), Array(0, 1, 2, 0))), _
+Array(68, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 0, 2, 0))), _
+Array(70, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0))), _
+Array(67, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(71, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(69, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(0, 1, 2, 0), Array(1, 0, 2, 0))), _
+Array(67, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(72, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 2, 0))), _
+Array(70, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 2, 0), Array(1, 0, 2, 0))), _
+Array(66, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1))), _
+Array(73, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(1, 0, 2, 0))), _
+Array(68, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(1, 0, 2, 0), Array(0, 1, 1, 1))), _
+Array(73, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(1, 0, 2, 0))), _
+Array(74, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0))), _
+Array(70, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(1, 0, 2, 0), Array(1, 1, 2, 0), Array(0, 1, 1, 1))), _
+Array(66, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1))), _
+Array(75, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(1, 1, 2, 0))), _
+Array(72, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(1, 1, 2, 0), Array(0, 1, 1, 1))), _
+Array(75, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(1, 1, 2, 0))), _
+Array(74, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(2, 0, 1, 1), Array(1, 1, 2, 0), Array(1, 0, 2, 0))), _
+Array(65, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1))), _
+Array(76, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(67, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(0, 1, 1, 1), Array(2, 0, 1, 1))), _
+Array(76, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(77, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(0, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(71, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 0, 1, 1), Array(0, 1, 1, 1), Array(0, 1, 2, 0), Array(2, 0, 1, 1))), _
+Array(0, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0))), _
+Array(78, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1))), _
+Array(2, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 0, 1, 0))), _
+Array(78, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1))), _
+Array(66, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(1, 0, 1, 1))), _
+Array(78, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1))), _
+Array(79, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0))), _
+Array(3, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(0, 0, 1, 0))), _
+Array(79, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0))), _
+Array(80, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 1, 2, 0))), _
+Array(12, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 0), Array(1, 1, 2, 0), Array(0, 0, 1, 0))), _
+Array(78, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1))), _
+Array(81, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(13, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(0, 0, 1, 0))), _
+Array(81, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(67, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 0, 1, 1))), _
+Array(81, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1))), _
+Array(82, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(14, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 1, 0))), _
+Array(82, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(83, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(33, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 0, 1, 0))), _
+Array(83, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(84, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(34, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 2, 2, 0), Array(0, 0, 1, 0))), _
+Array(82, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(85, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0))), _
+Array(35, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 0, 1, 0))), _
+Array(85, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0))), _
+Array(86, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(36, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 2, 2, 0), Array(0, 0, 1, 0))), _
+Array(82, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(87, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(37, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(0, 0, 1, 0))), _
+Array(87, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(84, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(0, 1, 2, 0))), _
+Array(87, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(86, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(1, 1, 2, 0))), _
+Array(78, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1))), _
+Array(88, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1))), _
+Array(41, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 1, 0))), _
+Array(88, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1))), _
+Array(82, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 1, 1))), _
+Array(88, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1))), _
+Array(89, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0))), _
+Array(45, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 0, 1, 0))), _
+Array(89, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0))), _
+Array(85, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(2, 0, 1, 1), Array(1, 1, 1, 1), Array(1, 1, 2, 0), Array(0, 1, 1, 1))), _
+Array(0, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0))), _
+Array(90, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 0))), _
+Array(47, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 0), Array(0, 0, 1, 0))), _
+Array(90, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 0))), _
+Array(79, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 0), Array(2, 0, 1, 1))), _
+Array(0, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0))), _
+Array(91, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1))), _
+Array(51, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(0, 0, 1, 0))), _
+Array(91, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1))), _
+Array(76, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 0, 1, 1))), _
+Array(91, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1))), _
+Array(81, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(2, 0, 1, 1))), _
+Array(91, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1))), _
+Array(92, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(52, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 0, 1, 0))), _
+Array(92, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(82, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(2, 0, 1, 1))), _
+Array(92, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(93, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(59, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 0, 1, 0))), _
+Array(93, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(83, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(2, 0, 1, 1))), _
+Array(93, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0))), _
+Array(94, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(60, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 2, 2, 0), Array(0, 0, 1, 0))), _
+Array(94, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 2, 2, 0))), _
+Array(84, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 1, 2, 0), Array(0, 2, 2, 0), Array(2, 0, 1, 1))), _
+Array(92, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1))), _
+Array(95, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(61, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(0, 0, 1, 0))), _
+Array(95, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(87, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(2, 0, 1, 1))), _
+Array(95, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0))), _
+Array(94, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(0, 1, 1, 1), Array(1, 1, 1, 1), Array(0, 2, 2, 0), Array(0, 1, 2, 0))), _
+Array(0, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0))), _
+Array(96, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 1, 1, 1))), _
+Array(63, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 1, 1, 1), Array(0, 0, 1, 0))), _
+Array(96, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 1, 1, 1))), _
+Array(88, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 1, 1, 1), Array(2, 0, 1, 1))), _
+Array(96, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 1, 1, 1))), _
+Array(92, Array(Array(0, 0, 0, 1), Array(1, 0, 0, 0), Array(1, 1, 0, 0), Array(0, 2, 0, 0), Array(1, 1, 1, 1), Array(0, 1, 1, 1))))
