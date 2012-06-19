@@ -6,7 +6,6 @@ var express = require('express'),
     routes = require('./routes'),
     app = module.exports = express.createServer(),
     fs = require('fs'),
-    forceDomain = require('connect-force-domain'),
     config = require('./separate/config.json');
 
 
@@ -36,7 +35,6 @@ app.configure(function () {
     app.use(app.router);
     app.use(express['static'](__dirname + '/public'));
     app.use(express['static'](__dirname + '/separate/public'));
-    app.use(forceDomain('www.realitybuilder.com'));
 });
 
 app.configure('development', function () {
