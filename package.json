@@ -4,12 +4,13 @@
   "scripts": {
     "start": "app.js"
   },
-  "version": "2.0.1-5",
+  "version": "2.0.1-7",
   "dependencies": {
     "express": "2.5.x",
     "ntwitter": "0.3.x",
     "stylus": "0.27.x",
-    "jade": "0.26.x"
+    "jade": "0.26.x",
+    "connect-force-domain": "0.1.x"
   },
   "engines": {
     "node": "0.6.x"
