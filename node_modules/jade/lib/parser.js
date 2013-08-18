@@ -185,6 +185,7 @@ Parser.prototype = {
    * | yield
    * | id
    * | class
+   * | interpolation
    */
   
   parseExpr: function(){
@@ -219,6 +220,8 @@ Parser.prototype = {
         return this.parseCode();
       case 'call':
         return this.parseCall();
+      case 'interpolation':
+        return this.parseInterpolation();
       case 'yield':
         this.advance();
         var block = new nodes.Block;
@@ -581,6 +584,17 @@ Parser.prototype = {
   },
 
   /**
+   * interpolation (attrs | class | id)* (text | code | ':')? newline* block?
+   */
+  
+  parseInterpolation: function(){
+    var tok = this.advance();
+    var tag = new nodes.Tag(tok.val);
+    tag.buffer = true;
+    return this.tag(tag);
+  },
+
+  /**
    * tag (attrs | class | id)* (text | code | ':')? newline* block?
    */
   
@@ -594,9 +608,23 @@ Parser.prototype = {
       }
     }
 
-    var name = this.advance().val
-      , tag = new nodes.Tag(name);
-    
+    var tok = this.advance()
+      , tag = new nodes.Tag(tok.val);
+
+    tag.selfClosing = tok.selfClosing;
+
+    return this.tag(tag);
+  },
+
+  /**
+   * Parse tag.
+   */
+
+  tag: function(tag){
+    var dot;
+
+    tag.line = this.line();
+
     // (attrs | class | id)*
     out:
       while (true) {
@@ -612,6 +640,8 @@ Parser.prototype = {
               , escaped = tok.escaped
               , names = Object.keys(obj);
 
+            if (tok.selfClosing) tag.selfClosing = true;
+
             for (var i = 0, len = names.length; i < len; ++i) {
               var name = names[i]
                 , val = obj[name];
@@ -622,20 +652,6 @@ Parser.prototype = {
             break out;
         }
       }
-
-    // self-closing
-    if ('/' == this.peek().val) {
-      this.advance();
-      tag.selfClosing = true;
-    }
-
-    return this.tag(tag);
-  },
-  
-  tag: function(tag){
-    var dot;
-
-    tag.line = this.line();
 
     // check immediate '.'
     if ('.' == this.peek().val) {
@@ -664,7 +680,7 @@ Parser.prototype = {
     tag.textOnly = tag.textOnly || ~textOnly.indexOf(tag.name);
 
     // script special-case
-    if ('script' == tag.name && tag.getAttribute) {
+    if ('script' == tag.name) {
       var type = tag.getAttribute('type');
       if (!dot && type && 'text/javascript' != type.replace(/^['"]|['"]$/g, '')) {
         tag.textOnly = false;
