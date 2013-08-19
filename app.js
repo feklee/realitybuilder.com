@@ -4,10 +4,10 @@
 
 var express = require('express'),
     routes = require('./routes'),
-    app = module.exports = express.createServer(),
+    app = module.exports = express(),
     fs = require('fs'),
-    config = require('./separate/config.json');
-
+    config = require('./separate/config.json'),
+    port = process.env.PORT || 3000;
 
 function prependWwwToRealitybuilderCom(req, res, next) {
     if (req.headers.host.split(':', 1)[0].toLowerCase() ===
@@ -57,7 +57,7 @@ app.post('/twitter', routes.twitter);
 app.get('/admin', routes.admin);
 app.post('/admin', routes.verifyAdminPassword);
 
-app.listen(process.env.PORT || 3000, function () {
+app.listen(port, function () {
     console.log("Express server listening on port %d in %s mode",
-                app.address().port, app.settings.env);
+                port, app.settings.env);
 });
