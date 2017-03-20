@@ -21,7 +21,7 @@
 var Twitter = require('ntwitter'),
     config = require('../separate/config.json'),
     twitter,
-    realityBuilderVersion = '1-9-0',
+    realityBuilderVersion = '1-10-0',
     adminPassword;
 
 twitter = new Twitter(config.twitter);
