@@ -56,6 +56,11 @@ Sections, by examples:
 
         "sessionSecret": "s3cr3t"
 
+  * Whether `realitybuilder.js` is hosted on Appspot (vs. on
+    localhost):
+  
+        "jsHostedOnAppspot": false
+
 
 Internet Explorer support
 =========================

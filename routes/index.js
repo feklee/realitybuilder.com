@@ -22,8 +22,14 @@ var Twitter = require('ntwitter'),
     config = require('../separate/config.json'),
     twitter,
     realityBuilderVersion = '1-10-0',
+    jsBaseUrl =
+    config.jsHostedOnAppspot
+    ? ('http://' + realityBuilderVersion +
+       '.realitybuilder-hrd.appspot.com')
+    : 'http://localhost:8080',
     adminPassword;
 
+/* BROKEN
 twitter = new Twitter(config.twitter);
 twitter.verifyCredentials(function (errorMessage) {
     if (errorMessage) {
@@ -31,6 +37,7 @@ twitter.verifyCredentials(function (errorMessage) {
         process.exit(1);
     }
 });
+*/
 
 adminPassword = config.adminPassword;
 
@@ -41,6 +48,7 @@ exports.index = function (req, res) {
     res.render('index', {
         title: 'Reality Builder',
         realityBuilderVersion: realityBuilderVersion,
+        jsBaseUrl: jsBaseUrl,
         stillImagesBaseUrl: config.stillImagesBaseUrl
     });
 };
@@ -87,6 +95,7 @@ exports.admin = function (req, res) {
         res.render('admin', {
             title: 'Reality Builder Administration',
             realityBuilderVersion: realityBuilderVersion,
+            jsBaseUrl: jsBaseUrl,
             stillImagesBaseUrl: config.stillImagesBaseUrl
         });
     }
@@ -114,6 +123,7 @@ exports.presentation = function (req, res) {
 exports.twitter = function (req, res) {
     /*jslint unparam:false */
 
+/* BROKEN
     twitter.updateStatus(
         req.body.status,
         function (errorMessage) {
@@ -122,6 +132,7 @@ exports.twitter = function (req, res) {
             }
         }
     );
+*/
 
     res.end();
 };
