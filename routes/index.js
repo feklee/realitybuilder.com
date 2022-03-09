@@ -24,6 +24,7 @@ var Twitter = require('ntwitter'),
     realityBuilderVersion = '1-10-0',
     adminPassword;
 
+/* BROKEN
 twitter = new Twitter(config.twitter);
 twitter.verifyCredentials(function (errorMessage) {
     if (errorMessage) {
@@ -31,6 +32,7 @@ twitter.verifyCredentials(function (errorMessage) {
         process.exit(1);
     }
 });
+*/
 
 adminPassword = config.adminPassword;
 
@@ -114,6 +116,7 @@ exports.presentation = function (req, res) {
 exports.twitter = function (req, res) {
     /*jslint unparam:false */
 
+/* BROKEN
     twitter.updateStatus(
         req.body.status,
         function (errorMessage) {
@@ -122,6 +125,7 @@ exports.twitter = function (req, res) {
             }
         }
     );
+*/
 
     res.end();
 };
