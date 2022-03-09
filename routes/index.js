@@ -22,11 +22,6 @@ var Twitter = require('twitter'),
     config = require('../separate/config.json'),
     twitter,
     realityBuilderVersion = '1-10-0',
-    jsBaseUrl =
-    config.jsHostedOnAppspot
-    ? ('http://' + realityBuilderVersion +
-       '.realitybuilder-hrd.appspot.com')
-    : 'http://localhost:8080',
     adminPassword;
 
 twitter = new Twitter(config.twitter);
@@ -40,7 +35,7 @@ exports.index = function (req, res) {
     res.render('index', {
         title: 'Reality Builder',
         realityBuilderVersion: realityBuilderVersion,
-        jsBaseUrl: jsBaseUrl,
+        appBaseUrl: config.appBaseUrl,
         stillImagesBaseUrl: config.stillImagesBaseUrl
     });
 };
@@ -87,7 +82,7 @@ exports.admin = function (req, res) {
         res.render('admin', {
             title: 'Reality Builder Administration',
             realityBuilderVersion: realityBuilderVersion,
-            jsBaseUrl: jsBaseUrl,
+            appBaseUrl: config.appBaseUrl,
             stillImagesBaseUrl: config.stillImagesBaseUrl
         });
     }

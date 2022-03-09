@@ -56,10 +56,9 @@ Sections, by examples:
 
         "sessionSecret": "s3cr3t"
 
-  * Whether `realitybuilder.js` is hosted on Appspot (vs. on
-    localhost):
+  * Base URL of the [Reality Builder app][5]:
   
-        "jsHostedOnAppspot": false
+        "appBaseUrl": "http://1-10-0.realitybuilder-hrd.appspot.com"
 
 
 Internet Explorer support
@@ -99,3 +98,4 @@ permissions and limitations under the License.
 [2]: https://github.com/downloads/feklee/realitybuilder.com/still_images.zip
 [3]: http://flashcanvas.net/
 [4]: mailto:felix.klee@inka.de
+[5]: https://github.com/feklee/realitybuilder 
