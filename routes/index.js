@@ -18,7 +18,7 @@
 
 'use strict';
 
-var Twitter = require('ntwitter'),
+var Twitter = require('twitter'),
     config = require('../separate/config.json'),
     twitter,
     realityBuilderVersion = '1-10-0',
@@ -29,15 +29,7 @@ var Twitter = require('ntwitter'),
     : 'http://localhost:8080',
     adminPassword;
 
-/* BROKEN
 twitter = new Twitter(config.twitter);
-twitter.verifyCredentials(function (errorMessage) {
-    if (errorMessage) {
-        console.log('Verifying Twitter credentials failed: ' + errorMessage);
-        process.exit(1);
-    }
-});
-*/
 
 adminPassword = config.adminPassword;
 
@@ -123,16 +115,17 @@ exports.presentation = function (req, res) {
 exports.twitter = function (req, res) {
     /*jslint unparam:false */
 
-/* BROKEN
-    twitter.updateStatus(
-        req.body.status,
-        function (errorMessage) {
-            if (errorMessage) {
-                console.log('Tweeting failed: ' + errorMessage);
+    twitter.post(
+        "statuses/update",
+        {
+            status: req.body.status
+        },
+        function(error, tweet, response) {
+            if (error) {
+                console.log("Tweeting failed:", error);
             }
         }
     );
-*/
 
     res.end();
 };
